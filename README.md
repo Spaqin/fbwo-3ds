@@ -5,7 +5,7 @@
 The aim was to create a homebrew game inspired by Tetris DS, seeing as it was one of the best Tetris installments on handhelds, without all the fanciness new games bring.
 
 Therefore, features include:
-* SRS (Super Rotation System) - which should allow 20G to still let the player play, not just cry in a corner.
+* SRS (Super Rotation System) - which should allow 20G to still let the player play, not just cry in a corner. Based on https://tetris.wiki/SRS#How_Guideline_SRS_Really_Works
 * Bag-style Random Generator - sequence of all the 7 blocks is shuffled, then put into play, so no more than 4 Z/S in a row will occur, therefore unlimited play is possible.
 * Marathon mode - of course. Limited to 20 levels (hardcoded, sorry, but be reasonable) with 10 line increments (by default).
 * Many variables to tweak - as of now, only in a text file. But, the number of variables is another topic in itself!
@@ -47,3 +47,7 @@ Finally, how do we play this thing?
 
 #Compiling
 Just use the attached makefile, but you probably will need sf2dlib and sfillib installed.
+
+#To do
+Some minor stuff, like more animations, 4-line clear indicator, back-to-back indicator, recognizing T-spins (much harder than it sounds), simple menu with configuration, and, of course, music support.
+The last one is the most important.

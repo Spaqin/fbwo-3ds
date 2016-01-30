@@ -567,7 +567,7 @@ void glue()
     }
     score += score_to_add;
 
-    int supposed_level = total_lines/cfg.lines_per_lvl + 1;
+    u32 supposed_level = total_lines/cfg.lines_per_lvl + 1;
     if(supposed_level > level && supposed_level <= 20)
     {
         level = supposed_level;

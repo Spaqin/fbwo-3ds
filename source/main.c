@@ -243,6 +243,14 @@ void parse_config(FILE* config_file)
                     level = val;
                 }
 	    }
+            else if(!strcmp(command, "lines_per_lvl\0"))
+	    {
+                if(val > 0)
+                {
+                    printf("lines per level = %d\n", val);
+                    cfg.lines_per_lvl = val;
+		}
+	    }
         }
         else if(sscanf(buffer, "%15s %60s", command, theme_folder_name) == 2)
         {

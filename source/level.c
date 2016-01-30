@@ -658,7 +658,6 @@ void deploy_hold()
     in_play = hold;
     if(check_collision(*in_play)) //if it can't spawn, well, it's a game over.
     {
-	printf("game over!\n");
 	do_gameover();
     }
 }

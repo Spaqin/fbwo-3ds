@@ -203,8 +203,6 @@ int check_collision(const Tetrimino tetrimino)
     int rotation = tetrimino.rotation;
     int posx = tetrimino.posx;
     int posy = tetrimino.posy;
-    if(posx > 15)
-	print_current_status();
     if(tetrimino.type != I_TYPE)
     {
         for(int i = 2; i >= 0; --i) //i - row
@@ -408,11 +406,11 @@ void rotate_clockwise()
     }
     else if(in_play->type != I_TYPE) // J L S T Z types are not I type.
     {
-        int rot_orig = in_play->rotation;
-        int rot_copy = copy.rotation;
-        int new_posx, new_posy;
+        u8 rot_orig = in_play->rotation;
+        u8 rot_copy = copy.rotation;
+        u32 new_posx, new_posy;
 
-        for(int i = 0; i < 5; i++)
+        for(u8 i = 0; i < 5; i++)
         {
             new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
             new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
@@ -431,11 +429,11 @@ void rotate_clockwise()
     }
     else //must be I-type then!
     {
-        int rot_orig = in_play->rotation;
-        int rot_copy = copy.rotation;
-        int new_posx, new_posy;
+        u8 rot_orig = in_play->rotation;
+        u8 rot_copy = copy.rotation;
+        u32 new_posx, new_posy;
 
-        for(int i = 0; i < 5; i++)
+        for(u8 i = 0; i < 5; i++)
         {
             new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
             new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
@@ -466,11 +464,11 @@ void rotate_counterclockwise()
     }
     else if(in_play->type != I_TYPE) // J L S T Z types are not I type.
     {
-        int rot_orig = in_play->rotation;
-        int rot_copy = copy.rotation;
-        int new_posx, new_posy;
+        u8 rot_orig = in_play->rotation;
+        u8 rot_copy = copy.rotation;
+        u32 new_posx, new_posy;
 
-        for(int i = 0; i < 5; i++)
+        for(u8 i = 0; i < 5; i++)
         {
             new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
             new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
@@ -488,11 +486,11 @@ void rotate_counterclockwise()
     }
     else //must be I-type then!
     {
-        int rot_orig = in_play->rotation;
-        int rot_copy = copy.rotation;
-        int new_posx, new_posy;
+        u8 rot_orig = in_play->rotation;
+        u8 rot_copy = copy.rotation;
+        u32 new_posx, new_posy;
 
-        for(int i = 0; i < 5; i++)
+        for(u8 i = 0; i < 5; i++)
         {
             new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
             new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
@@ -516,10 +514,10 @@ Glues the tetrimino to the playfield. Also, it sets some stuff and does basic ga
 */
 void glue()
 {
-    int posx = in_play->posx;
-    int posy = in_play->posy;
-    int type = in_play->type;
-    int rotation = in_play->rotation;
+    u32 posx = in_play->posx;
+    u32 posy = in_play->posy;
+    u8 type = in_play->type;
+    u8 rotation = in_play->rotation;
     if(type != I_TYPE)
         for(int i = 0; i < 3; ++i)
             for(int j = 0; j < 3; ++j)
@@ -535,10 +533,10 @@ void glue()
                 level_grid[posx+i][posy+j] |= rotation_I[rotation][j][i];
             }
     last_deployed = in_play;
-    int lines = check_lines();
+    u8 lines = check_lines();
     total_lines += lines;
-    int score_to_add = 0;
-    int back_to_back_flag_old = back_to_back_flag;
+    u32 score_to_add = 0;
+    u8 back_to_back_flag_old = back_to_back_flag;
     switch(lines) //todo - if recognized t-spins, award points for line clears too
     {
         case 0: //no lines? try to deploy a new one
@@ -569,7 +567,7 @@ void glue()
     }
     score += score_to_add;
 
-    int supposed_level = total_lines/10 + 1;
+    int supposed_level = total_lines/cfg.lines_per_lvl + 1;
     if(supposed_level > level && supposed_level <= 20)
     {
         level = supposed_level;
@@ -795,44 +793,3 @@ int rand_lim(int limit) {
     return retval;
 }
 
-void print_current_state_first_half()
-{
-    for(int i = 0; i < 12; ++i)
-    {
-	printf("[");
-	for(int j = 0; j < DIM_X -1; ++j)
-	    printf("%d ", level_grid[j][i]);
-	printf("%d]%d\n", level_grid[9][i], i);
-    }	
-}
-void print_current_state_second_half()
-{
-    for(int i = 12; i < 24; ++i)
-    {
-	printf("[");
-	for(int j = 0; j < DIM_X -1; ++j)
-	    printf("%d ", level_grid[j][i]);
-	printf("%d]%d\n", level_grid[9][i], i);
-    }	
-}
-void print_current_status()
-{
-	printf("type: %d, rotation: %d\n", in_play->type, in_play->rotation);
-	if(in_play->type != I_TYPE)
-	for(int i = 0; i < 3; ++i)
-	{
-		printf("[");
-		for(int j = 0; j < 3; ++j)
-			printf("%d",rotations[in_play->type][in_play->rotation][i][j]);
-		printf("]\n");
-	}
-	else
-	for(int i = 0; i < 5; ++i)
-	{
-		printf("[");
-		for(int j = 0; j < 5; ++j)
-			printf("%d",rotation_I[in_play->rotation][i][j]);
-		printf("]\n");
-	}
-		
-}

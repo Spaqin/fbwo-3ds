@@ -61,14 +61,14 @@ void render_frame()
 		//middle digit
 		    sf2d_draw_texture(
                                         misc_num[currentnum%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) + (misc_num[currentnum%10]->width>>1),
+                                        lines_frame.posx + (lines_frame.texture->width>>1) - (misc_num[currentnum%10]->width>>1),
                                         lines_frame.posy + digit_offset_linesy
                                      );
 		    currentnum = currentnum/10;
 		//last digit (actually this way it won't crash after getting >999, just won't display the number of thousands)
 		    sf2d_draw_texture(
                                         misc_num[currentnum%10],
-                                        lines_frame.posx + (lines_frame.texture->width>>1) + (misc_num[currentnum%10]->width>>1),
+                                        lines_frame.posx + (lines_frame.texture->width>>1) - (misc_num[currentnum%10]->width>>1) - misc_num[currentnum%10]->width,
                                         lines_frame.posy + digit_offset_linesy
                                      );
                     

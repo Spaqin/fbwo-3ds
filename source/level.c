@@ -1,7 +1,6 @@
 #include "level.h"
 #include "structs.h"
 #include <3ds.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -316,7 +315,9 @@ void increase_ticks()
     Tetrimino new_pos = *in_play;
     new_pos.posy++;
     if(check_collision(new_pos)) //means that there's something below, so we count down
+    {
         ticks_before_glue++;
+    }
 }
 
 void do_gravity()
@@ -532,8 +533,9 @@ void glue()
 		if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
                 level_grid[posx+i][posy+j] |= rotation_I[rotation][j][i];
             }
+    ticks_before_glue = 0;
     last_deployed = in_play;
-    u8 lines = check_lines();
+    u32 lines = check_lines();
     total_lines += lines;
     u32 score_to_add = 0;
     u8 back_to_back_flag_old = back_to_back_flag;
@@ -568,9 +570,9 @@ void glue()
     score += score_to_add;
 
     u32 supposed_level = total_lines/cfg.lines_per_lvl + 1;
-    if(supposed_level > level && supposed_level <= 20)
+    if(supposed_level > level)
     {
-        level = supposed_level;
+        level = supposed_level > level ? supposed_level > 20 ? 20 : supposed_level : level;
 	gravity_frame_counter = 0;
     }
     render_line_clear = 1;

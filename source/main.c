@@ -430,6 +430,7 @@ int main()
     cfg.glue_delay = 30;
     cfg.hold = 1;
     cfg.line_clear_frames = 40;
+    cfg.lines_per_lvl = 10;
     level = 1;
 	// level:             1   2   3   4   5   6   7   8  9  10 11 12 13 14 15 16 17 19 20 
     static const u32 fpd[] = {30, 28, 27, 24, 20, 15, 10, 8, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1};

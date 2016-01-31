@@ -53,9 +53,10 @@
 #define DEFAULT_OFFSET_LVLY	10
 #define DEFAULT_OFFSET_LNSY	10
 
-void render_grid_blocks();
-void render_block(Tetrimino, bool, bool);
-void render_frame();
+void render_grid_blocks(int);
+void render_block(Tetrimino, bool, bool, int);
+void render_frames();
+void render_frame(int);
 void graphics_parse_config(char*);
 void graphics_fini();
 void graphics_init();

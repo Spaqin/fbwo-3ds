@@ -43,8 +43,9 @@ u32 RIGHT_DAS_speed_count = 0;
 u32 LEFT_DAS_speed_count = 0;
 
 u8 restartpls = 0;
+u8 config_lvl = 1;
 
-char theme_template[64] = "default/%s";
+char theme_template[64] = "fbwo data/default/%s";
 
 void parse_config(FILE* config_file)
 {
@@ -240,7 +241,7 @@ void parse_config(FILE* config_file)
                 if(level > 0 && level <= 20)
                 {
                     printf("level = %d\n", val);
-                    level = val;
+                    config_lvl = val;
                 }
 	    }
             else if(!strcmp(command, "lines_per_lvl\0"))
@@ -257,7 +258,7 @@ void parse_config(FILE* config_file)
             if(!strcmp("theme", command));
             {
                 printf("theme %s\n", theme_folder_name);
-                sprintf(theme_template, "%s\\%%s", theme_folder_name);
+                sprintf(theme_template, "fbwo data/%s\\%%s", theme_folder_name);
             }
         }
     }
@@ -284,7 +285,7 @@ void tetris_control(u32 kDown)
         start_held = 0;
     if (kDown & KEY_SELECT)
     {
-	if(!gameover && kDown & KEY_START)
+	if(!gameover && (kDown & KEY_START))
 	    playable = 0;
 	if(gameover && playable)
 	    restartpls = 1;
@@ -442,7 +443,7 @@ int main()
     //load textures
 
     printf("reading config...\n");
-    FILE* config = fopen("config.cfg", "r");
+    FILE* config = fopen("fbwo data/config.cfg", "r");
     if(config != NULL)
         parse_config(config);
     else
@@ -459,6 +460,8 @@ int main()
     initialize_game();
     paused = 1;
     playable = 1;
+    restartpls = 0;
+    level = config_lvl;
 
     printf("Game ready! Press START to uh.. start?\n");
 
@@ -473,7 +476,7 @@ int main()
                 tetris_control(kDown);
 		if(!paused && controllable && !gameover)
 		    do_gravity();
-                render_frame();
+                render_frames();
 
                 break;
             //the following are still in "to-do" - not critical to gameplay

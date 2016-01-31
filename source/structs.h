@@ -36,11 +36,11 @@ struct Tetrimino_list* next;
 typedef struct{
 u32 DAS;  //delay (in frames) between pressing the button and moving the block automatically
 u32 DAS_speed; //delay (in frames) between moving the block
-u8 next_displayed; //no. of next blocks displayed, 0-6
-u8 invisimode; //blocks aren't rendered.
 u32 glue_delay; //lock delay - time (in frames) between block making it to the bottom and locking it in place
 u8 hold; //hold functionality
 u8 ghost_piece; //rendering of the ghost piece
+u8 next_displayed; //no. of next blocks displayed, 0-6
+u8 invisimode; //blocks aren't rendered.
 u32 line_clear_frames; //how many frames does the line clear animation last
 u32 frames_per_drop[20]; //how many frames per drop
 u32 rows_per_drop[20]; //how big the drop is

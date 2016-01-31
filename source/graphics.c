@@ -138,17 +138,7 @@ void render_frame()
                     }
                     if(!cfg.invisimode)
                     {
-                        for(int i = 4; i < DIM_Y; ++i)
-                        {
-                            if(render_line_clear && full_lines[i])
-                                continue;
-                            for(int j = 0; j < DIM_X; ++j)
-                            {
-                                int type;
-                                if((type = level_grid[j][i]))
-                                    sf2d_draw_texture(blocks[type-1], grid.posx + blocks[type-1]->width * j, grid.posy + blocks[type-1]->height * (i-4));
-                            }
-                        }
+			render_grid_blocks();
                     }
                     if(!render_line_clear)
                         remove_line_count = 0;
@@ -187,13 +177,31 @@ void render_frame()
                 }
                 else //must be game over
                 {
+		    render_grid_blocks();
                     sf2d_draw_texture(gameover_text, 200 - (gameover_text->width>>1), 120 - (gameover_text->height>>1));
+
                 }
 
 
         }
     sf2d_end_frame();
 }
+
+void render_grid_blocks()
+{
+	for(int i = 4; i < DIM_Y; ++i)
+	{
+	    if(render_line_clear && full_lines[i])
+		continue;
+	    for(int j = 0; j < DIM_X; ++j)
+	    {
+		int type;
+		if((type = level_grid[j][i]))
+		    sf2d_draw_texture(blocks[type-1], grid.posx + blocks[type-1]->width * j, grid.posy + blocks[type-1]->height * (i-4));
+	    }
+	}
+}
+
 
 /*
 Loads necessary textures given the template in "printf" format.

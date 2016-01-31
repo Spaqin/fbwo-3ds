@@ -53,6 +53,7 @@
 #define DEFAULT_OFFSET_LVLY	10
 #define DEFAULT_OFFSET_LNSY	10
 
+void render_grid_blocks();
 void render_block(Tetrimino, bool, bool);
 void render_frame();
 void graphics_parse_config(char*);
@@ -88,7 +89,7 @@ image hold_frame;
 
 sf2d_texture* tetriminos[7];
 sf2d_texture* blocks[7];
-sf2d_texture* score_num[10]; //by not using image struct but bare sf2d_texture* I just saved 304 bytes! well, that's kinda disappointing.
+sf2d_texture* score_num[10];
 sf2d_texture* misc_num[10];
 sf2d_texture* gameover_text;
 sf2d_texture* paused_text;

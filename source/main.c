@@ -22,12 +22,9 @@ u8 playable = 1;
 
 u8 mode = MODE_TETRIS;
 
-extern int level;
+extern u8 level;
 
-Handle paused_handle;
-Handle mutex;
-Thread timer_handle;
-
+extern u32 high_score;
 
 //controls related variables
 u8 start_held = 0;
@@ -46,6 +43,42 @@ u8 restartpls = 0;
 u8 config_lvl = 1;
 
 char theme_template[64] = "fbwo data/default/%s";
+
+void save_highscore()
+{
+    char highscore_filename[] = "fbwo data/hiscore.bin";
+    FILE* hs_file = fopen(highscore_filename, "wb");
+    if(hs_file == NULL)
+	return;
+    //write current configuration to compare
+    fwrite(&cfg, sizeof(Configuration), 1, hs_file);
+    //and, of course, the score itself.
+    fwrite(&high_score, sizeof(u32), 1, hs_file);
+    fclose(hs_file);
+}
+
+void load_highscore()
+{
+    char highscore_filename[] = "fbwo data/hiscore.bin";
+    FILE* hs_file = fopen(highscore_filename, "rb");
+    if(hs_file == NULL)
+    {
+	high_score = 0;
+	return;
+    }
+    Configuration old_cfg;
+    if(fread(&old_cfg, sizeof(Configuration), 1, hs_file))
+    {
+    	if(!memcmp(&old_cfg, &cfg, sizeof(Configuration))) //yes, it's OK, I tested the struct for padding
+	{
+	    if(!fread(&high_score, sizeof(u32), 1, hs_file)) //can't read the score, well, set it to 0
+		high_score = 0;
+	}
+	else //different config - can't really compare the scores
+	    high_score = 0; 
+    } 
+    fclose(hs_file);
+}
 
 void parse_config(FILE* config_file)
 {
@@ -217,7 +250,7 @@ void parse_config(FILE* config_file)
 	    {
                 if(val >= 0 && val < 7)
                 {
-                    printf("next displayed pieces no. %d", val);
+                    printf("next displayed pieces no. %d\n", val);
                     cfg.next_displayed = val;
                 }
 	    }
@@ -262,6 +295,7 @@ void parse_config(FILE* config_file)
             }
         }
     }
+    fclose(config_file);
 }
 
 void tetris_control(u32 kDown)
@@ -462,6 +496,7 @@ int main()
     playable = 1;
     restartpls = 0;
     level = config_lvl;
+    load_highscore();
 
     printf("Game ready! Press START to uh.. start?\n");
 
@@ -477,7 +512,7 @@ int main()
 		if(!paused && controllable && !gameover)
 		    do_gravity();
                 render_frames();
-
+		
                 break;
             //the following are still in "to-do" - not critical to gameplay
             case MODE_MENU:
@@ -506,6 +541,7 @@ int main()
     }
 
     exit:
+    save_highscore();
     printf("exitting...\n");
     graphics_fini();
     return 0;

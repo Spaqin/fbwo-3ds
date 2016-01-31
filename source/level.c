@@ -5,7 +5,7 @@
 #include <time.h>
 
 //peanut variable init time
-int render_line_clear = 0;
+u8 render_line_clear = 0;
 
 const int rotation_offsets[2][4][5][2] = //[JLSTZ/I][Rotation][Offsets1..5][x, y]
 {
@@ -284,7 +284,7 @@ void initialize_game()
     total_lines = 0;
     gravity_frame_counter = 0;
     score = 0;
-
+    high_score = 0;
     deploy_next();
 }
 
@@ -337,7 +337,11 @@ void soft_drop()
 {
  //the only difference that it adds score if the drop was successful.
     if(gravity_drop())
+    {
         score++;
+	if(score > high_score)
+    	    high_score = score;
+    }
 }
 
 //returns a tetrimino that serves as the ghost piece.
@@ -364,6 +368,8 @@ int go_all_down()
     }
     in_play->posy = copy.posy - 1;
     score += rows << 1; //2 points per tile dropped
+    if(score > high_score)
+	high_score = score;
     glue();
     return rows;
 }
@@ -568,6 +574,8 @@ void glue()
         score_to_add >>= 1;
     }
     score += score_to_add;
+    if(score > high_score)
+	high_score = score;
 
     u32 supposed_level = total_lines/cfg.lines_per_lvl + 1;
     if(supposed_level > level)

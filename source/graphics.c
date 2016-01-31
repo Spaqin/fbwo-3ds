@@ -43,12 +43,23 @@ void render_frame(int offset)
                 sf2d_draw_texture(background.texture, background.posx, background.posy);
                 sf2d_draw_texture(grid.texture, grid.posx + offset, grid.posy);
                 sf2d_draw_texture(score_text.texture, score_text.posx, score_text.posy);
-                s32 score_temp = score;
-                s32 i = 9;
+                u32 score_temp = score;
+                u8 i = 9;
                 do{ //"do" so it can display '0' too
                     s32 digit = score_temp % 10;
                     score_temp /= 10;
                     sf2d_draw_texture(score_num[digit], score_text.posx + score_text.texture->width+score_num[digit]->width*i, score_text.posy);
+                    i--;
+                }
+                while(score_temp);
+		//high score too
+                sf2d_draw_texture(hiscore_text.texture, hiscore_text.posx, hiscore_text.posy);
+                score_temp = high_score;
+                i = 9;
+                do{ //"do" so it can display '0' too
+                    s32 digit = score_temp % 10;
+                    score_temp /= 10;
+                    sf2d_draw_texture(score_num[digit], hiscore_text.posx + hiscore_text.texture->width+score_num[digit]->width*i, hiscore_text.posy);
                     i--;
                 }
                 while(score_temp);
@@ -321,7 +332,15 @@ int load_textures(const char* str_template)
         printf("error loading %s\n", buffer);
         return 0;
     }
-
+    sprintf(buffer, str_template, "hiscore_text.png");
+    hiscore_text.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+    hiscore_text.posx = DEFAULT_HISCORE_TEXTX;
+    hiscore_text.posy = DEFAULT_HISCORE_TEXTY;
+    if(!score_text.texture)
+    {
+        printf("error loading %s\n", buffer);
+        return 0;
+    }
     sprintf(buffer, str_template, "lines_frame.png");
     lines_frame.texture = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
     lines_frame.posx = DEFAULT_LINES_FRAMEX;
@@ -519,6 +538,12 @@ void graphics_parse_config(char* theme_template)
                 score_text.posx = valx;
                 score_text.posy = valy;
             }
+            else if(!strcmp(command, "hiscore_text"))
+            {
+                printf("hiscore_text = [%ld, %ld]\n", valx, valy);
+                hiscore_text.posx = valx;
+                hiscore_text.posy = valy;
+            }
             else if(!strcmp(command, "lines_frame"))
             {
                 printf("lines_frame = [%ld, %ld]\n", valx, valy);
@@ -564,6 +589,7 @@ void graphics_parse_config(char* theme_template)
             }
 	}
     }
+    fclose(cfgf);
 }
 
 void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offset)

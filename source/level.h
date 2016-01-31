@@ -23,17 +23,19 @@ Tetrimino* hold;
 Tetrimino* last_deployed;
 Tetrimino_list* next_blocks;
 
-u8 hold_last; //flag to disallow infinite holding
-int ticks_before_glue;
-u8 gameover;
-int score;
-int next_counter;
-int level;
-int total_lines;
-int back_to_back_flag;
-int render_line_clear;
 
+u32 ticks_before_glue;
+u32 score;
 u32 gravity_frame_counter;
+u32 total_lines;
+u32 high_score;
+
+u8 back_to_back_flag;
+u8 render_line_clear;
+u8 next_counter;
+u8 level;
+u8 gameover;
+u8 hold_last; //flag to disallow infinite holding
 
 //function declaration
 int check_collision(const Tetrimino);

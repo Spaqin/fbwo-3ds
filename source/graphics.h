@@ -35,6 +35,9 @@
 #define DEFAULT_SCORE_TEXTX     280
 #define DEFAULT_SCORE_TEXTY     210
 
+#define DEFAULT_HISCORE_TEXTX     0
+#define DEFAULT_HISCORE_TEXTY     210
+
 #define DEFAULT_LINES_FRAMEX    115
 #define DEFAULT_LINES_FRAMEY    140
 
@@ -64,8 +67,9 @@ int load_textures(const char*);
 
 extern u8 mode;
 extern int level_grid[DIM_X][DIM_Y];
-extern int score;
-extern int total_lines;
+extern u32 score;
+extern u32 high_score;
+extern u32 total_lines;
 extern u8 paused;
 extern u8 controllable;
 
@@ -84,6 +88,7 @@ image next_text;
 image next_frame[6];
 image grid;
 image score_text;
+image hiscore_text;
 image lines_frame;
 image level_frame;
 image hold_frame;

@@ -67,11 +67,11 @@ void load_highscore()
 	return;
     }
     Configuration old_cfg;
-    if(fread(&old_cfg, sizeof(Configuration), 1, hs_file))
+    if(fread(&old_cfg, sizeof(Configuration), 1, hs_file) == sizeof(Configuration))
     {
     	if(!memcmp(&old_cfg, &cfg, sizeof(Configuration))) //yes, it's OK, I tested the struct for padding
 	{
-	    if(!fread(&high_score, sizeof(u32), 1, hs_file)) //can't read the score, well, set it to 0
+	    if(fread(&high_score, sizeof(u32), 1, hs_file) != sizeof(u32)) //can't read the score, well, set it to 0
 		high_score = 0;
 	}
 	else //different config - can't really compare the scores

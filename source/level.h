@@ -38,6 +38,8 @@ u8 gameover;
 u8 hold_last; //flag to disallow infinite holding
 
 //function declaration
+void save_highscore();
+void load_highscore();
 int check_collision(const Tetrimino);
 void initialize_game();
 int gravity_drop();

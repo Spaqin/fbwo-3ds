@@ -3,6 +3,8 @@
 #include <3ds.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+#include <stdio.h>
 
 //peanut variable init time
 u8 render_line_clear = 0;
@@ -192,6 +194,50 @@ const int rotation_I[4][5][5] =
      { 0, 0, 0, 0, 0}
     }
 };
+
+void save_highscore()
+{
+    char highscore_filename[] = "fbwodata/hiscore.bin";
+    FILE* hs_file = fopen(highscore_filename, "wb");
+    if(hs_file == NULL)
+	return;
+    //write current configuration to compare
+    fwrite(&cfg, sizeof(Configuration), 1, hs_file);
+    //and, of course, the score itself.
+    fwrite(&high_score, sizeof(u32), 1, hs_file);
+    fclose(hs_file);
+}
+
+void load_highscore()
+{
+    char highscore_filename[] = "fbwodata/hiscore.bin";
+    FILE* hs_file = fopen(highscore_filename, "rb");
+    if(hs_file == NULL)
+    {
+	printf("error opening high score file\n");
+	high_score = 0;
+	return;
+    }
+    Configuration old_cfg;
+    u32 size;
+    if((size = fread(&old_cfg, sizeof(Configuration), 1, hs_file)))
+    {
+    	if(!memcmp(&old_cfg, &cfg, sizeof(Configuration))) //yes, it's OK, I tested the struct for padding
+	{
+	    if(!fread(&high_score, sizeof(u32), 1, hs_file)) //can't read the score, well, set it to 0
+	    {
+		high_score = 0;
+	    }
+	}
+	else //different config - can't really compare the scores
+	{
+	    high_score = 0; 
+	}
+    } 
+    else
+	high_score = 0;
+    fclose(hs_file);
+}
 
 /*
 returns whether or not there will be a collision for a given tetrimino.
@@ -604,7 +650,7 @@ void do_gameover()
     free(in_play);
     free(hold);
     free(full_lines);
-
+    save_highscore();
 }
 
 void recursive_list_cleanup(Tetrimino_list* element)
@@ -621,8 +667,16 @@ void deploy_next()
     Tetrimino_list* to_free = next_blocks;
 
     //set the values to default
-    to_deploy->posx = 4;
-    to_deploy->posy = 2;
+    if(to_deploy->type != I_TYPE)
+    {
+    	to_deploy->posx = 4;
+    	to_deploy->posy = 2;
+    }
+    else
+    {
+	to_deploy->posx = 3;
+	to_deploy->posy = 1;
+    }
     to_deploy->rotation = 0;
     hold_last = 0;
     //clean up
@@ -662,8 +716,16 @@ void do_hold()
 
 void deploy_hold()
 {
-    hold->posx = 4;
-    hold->posy = 2;
+    if(hold->type != I_TYPE)
+    {
+    	hold->posx = 4;
+    	hold->posy = 2;
+    }
+    else
+    {
+   	hold->posx = 3;
+   	hold->posy = 1;
+    }
     hold->rotation = 0;
     in_play = hold;
     if(check_collision(*in_play)) //if it can't spawn, well, it's a game over.

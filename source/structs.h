@@ -22,10 +22,10 @@
 #include <sf2d.h>
 
 typedef struct{
-u8 type;
-u8 rotation;
 u32 posx; //top left corner postition
 u32 posy;
+u8 type;
+u8 rotation;
 }Tetrimino;
 
 typedef struct Tetrimino_list{

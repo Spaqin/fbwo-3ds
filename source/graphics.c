@@ -66,7 +66,7 @@ void render_frame(int offset)
 
                 //level
                 sf2d_draw_texture(level_frame.texture, level_frame.posx + (offset >> 1), level_frame.posy);
-                if(level/10)
+                if(level >= 10)
                 {
                     sf2d_draw_texture(
                                         misc_num[level/10],
@@ -87,7 +87,7 @@ void render_frame(int offset)
                                      );
                 //lines
                 sf2d_draw_texture(lines_frame.texture, lines_frame.posx + (offset >> 1), lines_frame.posy);
-                if(total_lines/100)
+                if(total_lines >= 100)
                 {
 		    int currentnum = total_lines;
 		//last digit
@@ -112,7 +112,7 @@ void render_frame(int offset)
                                      );
                     
                 }
-                else if(total_lines/10)
+                else if(total_lines >= 10)
                 {
                     sf2d_draw_texture(
                                         misc_num[total_lines/10],

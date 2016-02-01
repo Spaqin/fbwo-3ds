@@ -42,43 +42,7 @@ u32 LEFT_DAS_speed_count = 0;
 u8 restartpls = 0;
 u8 config_lvl = 1;
 
-char theme_template[64] = "fbwo data/default/%s";
-
-void save_highscore()
-{
-    char highscore_filename[] = "fbwo data/hiscore.bin";
-    FILE* hs_file = fopen(highscore_filename, "wb");
-    if(hs_file == NULL)
-	return;
-    //write current configuration to compare
-    fwrite(&cfg, sizeof(Configuration), 1, hs_file);
-    //and, of course, the score itself.
-    fwrite(&high_score, sizeof(u32), 1, hs_file);
-    fclose(hs_file);
-}
-
-void load_highscore()
-{
-    char highscore_filename[] = "fbwo data/hiscore.bin";
-    FILE* hs_file = fopen(highscore_filename, "rb");
-    if(hs_file == NULL)
-    {
-	high_score = 0;
-	return;
-    }
-    Configuration old_cfg;
-    if(fread(&old_cfg, sizeof(Configuration), 1, hs_file) == sizeof(Configuration))
-    {
-    	if(!memcmp(&old_cfg, &cfg, sizeof(Configuration))) //yes, it's OK, I tested the struct for padding
-	{
-	    if(fread(&high_score, sizeof(u32), 1, hs_file) != sizeof(u32)) //can't read the score, well, set it to 0
-		high_score = 0;
-	}
-	else //different config - can't really compare the scores
-	    high_score = 0; 
-    } 
-    fclose(hs_file);
-}
+char theme_template[64] = "fbwodata/default/%s";
 
 void parse_config(FILE* config_file)
 {
@@ -291,7 +255,7 @@ void parse_config(FILE* config_file)
             if(!strcmp("theme", command));
             {
                 printf("theme %s\n", theme_folder_name);
-                sprintf(theme_template, "fbwo data/%s\\%%s", theme_folder_name);
+                sprintf(theme_template, "fbwodata/%s/%%s", theme_folder_name);
             }
         }
     }
@@ -477,7 +441,7 @@ int main()
     //load textures
 
     printf("reading config...\n");
-    FILE* config = fopen("fbwo data/config.cfg", "r");
+    FILE* config = fopen("fbwodata/config.cfg", "r");
     if(config != NULL)
         parse_config(config);
     else

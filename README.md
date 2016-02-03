@@ -5,10 +5,11 @@
 The aim was to create a homebrew game inspired by Tetris DS, seeing as it was one of the best Tetris installments on handhelds, without all the fanciness new games bring.
 
 Therefore, features include:
-* SRS (Super Rotation System) - which should allow 20G to still let the player play, not just cry in a corner. Based on https://tetris.wiki/SRS#How_Guideline_SRS_Really_Works
-* Bag-style Random Generator - sequence of all the 7 blocks is shuffled, then put into play, so no more than 4 Z/S in a row will occur, therefore unlimited play is possible.
-* Marathon mode - of course. Limited to 20 levels (hardcoded, sorry, but be reasonable) with 10 line increments (by default).
-* High score support - keeps the high score for the current configuration. If the configuration is different in current game than in the one with that high score, it will be set to 0.
+* <b>SRS</b> (Super Rotation System) - which should allow 20G to still let the player play, not just cry in a corner. Based on https://tetris.wiki/SRS#How_Guideline_SRS_Really_Works
+* Not only SRS though - TGM system - <b>ARS</b> - has been implemented too! When using ARS, soft drop will have no lock delay, so be careful!
+* <b>Bag-style Random Generator</b> - sequence of all the 7 blocks is shuffled, then put into play, so no more than 4 Z/S in a row will occur, therefore unlimited play is possible.
+* <b>Marathon mode</b> - of course. Limited to 20 levels (hardcoded, sorry, but be reasonable) with 10 line increments (by default).
+* <b>High score</b> support - keeps the high score for the current configuration. If the configuration is different in current game than in the one with that high score, it will be set to 0.
 * Many variables to tweak - as of now, only in a text file. But, the number of variables is another topic in itself!
 * Theme support - no support for theme per level though, only one for the entire duration.
 
@@ -28,6 +29,8 @@ If any of these settings is not present in the file, a default value (hardcoded)
 * line_clear_frms [number] - how many frames line clear animation lasts
 * level [1-20] - level you start with.
 * lines_per_lvl [number] - lines the player needs to clear before advancing to the next level.
+* ars [0/1] - switches between SRS (0) and ARS (1)
+* are_delay - ARE delay in frames (time between a block locking and spawning the new one)
 * theme [name] - name of the folder with your theme.
 
 #Theme settings

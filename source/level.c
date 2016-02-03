@@ -1,6 +1,7 @@
 #include "level.h"
 #include "structs.h"
 #include <3ds.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -8,6 +9,8 @@
 
 //peanut variable init time
 u8 render_line_clear = 0;
+
+
 
 const int rotation_offsets[2][4][5][2] = //[JLSTZ/I][Rotation][Offsets1..5][x, y]
 {
@@ -195,9 +198,179 @@ const int rotation_I[4][5][5] =
     }
 };
 
+//it's ARS now
+
+const int ARS_rotations[6][4][3][3] =
+{
+    { //O-block
+        {
+         { 0, 0, 0 },
+         { 0, 1, 1 },
+         { 0, 1, 1 },
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 1, 1 },
+         { 0, 1, 1 },
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 1, 1 },
+         { 0, 1, 1 },
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 1, 1 },
+         { 0, 1, 1 },
+        }
+    },
+    { //T-block
+        {
+         { 0, 0, 0 },
+         { 2, 2, 2 },
+         { 0, 2, 0 }
+        },
+        {
+         { 0, 2, 0 },
+         { 2, 2, 0 },
+         { 0, 2, 0 }
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 2, 0 },
+         { 2, 2, 2 }
+        },
+        {
+         { 0, 2, 0 },
+         { 0, 2, 2 },
+         { 0, 2, 0 }
+        }
+    },
+    { //S-block
+        {
+         { 0, 0, 0 },
+         { 0, 3, 3 },
+         { 3, 3, 0 },
+        },
+        {
+         { 3, 0, 0 },
+         { 3, 3, 0 },
+         { 0, 3, 0 }
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 3, 3 },
+         { 3, 3, 0 },
+        },
+        {
+         { 3, 0, 0 },
+         { 3, 3, 0 },
+         { 0, 3, 0 }
+        }
+    },
+    { //Z-block
+        {
+         { 0, 0, 0 },
+         { 4, 4, 0 },
+         { 0, 4, 4 }
+        },
+        {
+         { 0, 0, 4 },
+         { 0, 4, 4 },
+         { 0, 4, 0 }
+        },
+        {
+         { 0, 0, 0 },
+         { 4, 4, 0 },
+         { 0, 4, 4 }
+        },
+        {
+         { 0, 0, 4 },
+         { 0, 4, 4 },
+         { 0, 4, 0 }
+        }
+    },
+    { //J-block
+        {
+         { 0, 0, 0 },
+         { 5, 5, 5 },
+         { 0, 0, 5 }
+        },
+        {
+         { 0, 5, 0 },
+         { 0, 5, 0 },
+         { 5, 5, 0 }
+        },
+        {
+         { 0, 0, 0 },
+         { 5, 0, 0 },
+         { 5, 5, 5 }
+        },
+        {
+         { 0, 5, 5 },
+         { 0, 5, 0 },
+         { 0, 5, 0 }
+        }
+    },
+    { //L-block
+        {
+         { 0, 0, 0 },
+         { 6, 6, 6 },
+         { 6, 0, 0 }
+        },
+        {
+         { 6, 6, 0 },
+         { 0, 6, 0 },
+         { 0, 6, 0 }
+        },
+        {
+         { 0, 0, 0 },
+         { 0, 0, 6 },
+         { 6, 6, 6 }
+        },
+        {
+         { 0, 6, 0 },
+         { 0, 6, 0 },
+         { 0, 6, 6 }
+        }
+    }
+};
+
+const int ARS_rotation_I[4][4][4] =
+{
+    {
+     { 0, 0, 0, 0},
+     { 7, 7, 7, 7},
+     { 0, 0, 0, 0},
+     { 0, 0, 0, 0}
+    },
+    {
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0}
+    },
+    {
+     { 0, 0, 0, 0},
+     { 7, 7, 7, 7},
+     { 0, 0, 0, 0},
+     { 0, 0, 0, 0}
+    },
+    {
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0},
+     { 0, 0, 7, 0}
+    }
+};
+
+u32 ARE_frames = 0;
+u8 ARE_held = 0;
+u8 ARS_glue_lock = 0;
+
 void save_highscore()
 {
-    char highscore_filename[] = "fbwodata/hiscore.bin";
+    char highscore_filename[] = "sdmc:/fbwodata/hiscore.bin";
     FILE* hs_file = fopen(highscore_filename, "wb");
     if(hs_file == NULL)
 	return;
@@ -210,7 +383,7 @@ void save_highscore()
 
 void load_highscore()
 {
-    char highscore_filename[] = "fbwodata/hiscore.bin";
+    char highscore_filename[] = "sdmc:/fbwodata/hiscore.bin";
     FILE* hs_file = fopen(highscore_filename, "rb");
     if(hs_file == NULL)
     {
@@ -248,57 +421,116 @@ int check_collision(const Tetrimino tetrimino)
     int rotation = tetrimino.rotation;
     int posx = tetrimino.posx;
     int posy = tetrimino.posy;
-    if(tetrimino.type != I_TYPE)
-    {
-        for(int i = 2; i >= 0; --i) //i - row
-            for(int j = 0; j < 3; ++j) //j - col
-            {
-                if(rotations[type][rotation][i][j]) //if we have something in that field...
-		{
-		    if(posx + j < 0) //and that something is too much to the left
+    if(!cfg.ARS)
+    { //SRS
+	    if(tetrimino.type != I_TYPE)
+	    {
+		for(int i = 2; i >= 0; --i) //i - row
+		    for(int j = 0; j < 3; ++j) //j - col
 		    {
-			return 1;
+		        if(rotations[type][rotation][i][j]) //if we have something in that field...
+			{
+			    if(posx + j < 0) //and that something is too much to the left
+			    {
+				return 1;
+			    }
+			    if(posx + j >= DIM_X) //or it's too much to the right
+			    {
+				return 1;
+			    }
+			    if(level_grid[posx+j][posy+i]) //or simply something is already there
+			    {
+				return 1;
+			    }
+			    if(posy + i >= DIM_Y) //or it's a bit too low
+			    {
+				return 1;
+			    }
+			}
 		    }
-		    if(posx + j >= DIM_X) //or it's too much to the right
+	    }
+	    else
+	    {
+		for(int i = 4; i >= 0; --i)
+		    for(int j = 0; j < 5; ++j)
 		    {
-			return 1;
+		        if(rotation_I[rotation][i][j]) //so we have something here
+			{
+			    if(posx + j < 0) //and that something is too much to the left
+			    {
+				return 1;
+			    }
+			    if(posx + j >= DIM_X) //or it's too much to the right
+			    {
+				return 1;
+			    }
+			    if(level_grid[posx+j][posy+i]) //or simply something is already there
+			    {
+				return 1;
+			    }
+			    if(posy + i >= DIM_Y) //or it's a bit too low
+			    {
+				return 1;
+			    }
+
+			}
 		    }
-		    if(posy + i >= DIM_Y) //or it's a bit too low
-		    {
-			return 1;
-		    }
-		    if(level_grid[posx+j][posy+i]) //or simply something is already there
-		    {
-			return 1;
-		    }
-		}
-            }
+	    }
     }
     else
-    {
-        for(int i = 4; i >= 0; --i)
-            for(int j = 0; j < 5; ++j)
-            {
-                if(rotation_I[rotation][i][j]) //so we have something here
-		{
-		    if(posx + j < 0) //and that something is too much to the left
+    { //ARS
+	if(tetrimino.type != I_TYPE)
+	    {
+		for(int i = 2; i >= 0; --i) //i - row
+		    for(int j = 0; j < 3; ++j) //j - col
 		    {
-			return 1;
+		        if(ARS_rotations[type][rotation][i][j]) //if we have something in that field...
+			{
+			    if(posx + j < 0) //and that something is too much to the left
+			    {
+				return 1;
+			    }
+			    if(posx + j >= DIM_X) //or it's too much to the right
+			    {
+				return 1;
+			    }
+			    if(level_grid[posx+j][posy+i]) //or simply something is already there
+			    {
+				return 1;
+			    }
+			    if(posy + i >= DIM_Y) //or it's a bit too low
+			    {
+				return 1;
+			    }
+			}
 		    }
-		    if(posx + j >= DIM_X) //or it's too much to the right
+	    }
+	    else
+	    {
+		for(int i = 3; i >= 0; --i)
+		    for(int j = 0; j < 4; ++j)
 		    {
-			return 1;
+		        if(ARS_rotation_I[rotation][i][j]) //so we have something here
+			{
+			    if(posx + j < 0) //and that something is too much to the left
+			    {
+				return 1;
+			    }
+			    if(posx + j >= DIM_X) //or it's too much to the right
+			    {
+				return 1;
+			    }
+			    if(level_grid[posx+j][posy+i]) //or simply something is already there
+			    {
+				return 1;
+			    }
+			    if(posy + i >= DIM_Y) //or it's a bit too low
+			    {
+				return 1;
+			    }
+			}
 		    }
-		    if(posy + i >= DIM_Y) //or it's a bit too low
-		    {
-			return 1;
-		    }
-		    if(level_grid[posx+j][posy+i]) //or simply something is already there
-		    {
-			return 1;
-		    }
-		}
-            }
+	    }
     }
     return 0;
 
@@ -331,14 +563,18 @@ void initialize_game()
     gravity_frame_counter = 0;
     score = 0;
     high_score = 0;
-    deploy_next();
+    ARE_state = 0;
+    ARE_frames = 0;
+    ARE_held = 0;
+    ARS_glue_lock = 0;
+    deploy_next(false);
 }
 
 /*
 Each tick the piece goes down; this function does that.
 Returns if a drop was successful or not.
 */
-int gravity_drop()
+u32 gravity_drop()
 {
     Tetrimino new_pos = *in_play;
     new_pos.posy++;
@@ -351,7 +587,8 @@ int gravity_drop()
     else //nothing below - just go down
     {
         in_play->posy++;
-	ticks_before_glue = 0;
+	if(!cfg.ARS || !ARS_glue_lock)
+	    ticks_before_glue = 0;
         return 1;
     }
 }
@@ -368,6 +605,8 @@ void increase_ticks()
 
 void do_gravity()
 {
+    if(ARE_state)
+	ARE_tick();
     increase_ticks();
     ++gravity_frame_counter;
     if(gravity_frame_counter == cfg.frames_per_drop[level-1])
@@ -387,6 +626,10 @@ void soft_drop()
         score++;
 	if(score > high_score)
     	    high_score = score;
+    }
+    else if (cfg.ARS) //ARS games don't do lock delay for soft drop.
+    {
+	glue();
     }
 }
 
@@ -429,7 +672,8 @@ void go_left()
     if(!check_collision(copy))
     {
         in_play->posx--;
-        ticks_before_glue = 0;
+	if(!cfg.ARS || !ARS_glue_lock)
+	    ticks_before_glue = 0;
     }
 }
 /*
@@ -442,7 +686,8 @@ void go_right()
     if(!check_collision(copy))
     {
         in_play->posx++;
-        ticks_before_glue = 0;
+	if(!cfg.ARS || !ARS_glue_lock)
+	    ticks_before_glue = 0;
     }
 }
 /*
@@ -457,51 +702,135 @@ void rotate_clockwise()
         ticks_before_glue = 0;
         return;
     }
-    else if(in_play->type != I_TYPE) // J L S T Z types are not I type.
-    {
-        u8 rot_orig = in_play->rotation;
-        u8 rot_copy = copy.rotation;
-        u32 new_posx, new_posy;
+    if(!cfg.ARS)
+    { //SRS
+    	if(in_play->type != I_TYPE) // J L S T Z types are not I type.
+    	{
+    	    u8 rot_orig = in_play->rotation;
+	    u8 rot_copy = copy.rotation;
+	    u32 new_posx, new_posy;
 
-        for(u8 i = 0; i < 5; i++)
-        {
-            new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
-            new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
-            //to do? recognize T-spins
-            copy.posx = new_posx;
-            copy.posy = new_posy;
-            if(!(check_collision(copy)))
+            for(u8 i = 0; i < 5; i++)
+	    {
+		new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
+		new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
+		//to do? recognize T-spins
+		copy.posx = new_posx;
+		copy.posy = new_posy;
+		if(!(check_collision(copy)))
+		{
+		    in_play->posx = new_posx;
+		    in_play->posy = new_posy;
+		    in_play->rotation = rot_copy;
+		    ticks_before_glue = 0;
+		    return;
+		}
+	     }
+	}
+	else //must be I-type then!
+	{
+            u8 rot_orig = in_play->rotation;
+            u8 rot_copy = copy.rotation;
+            u32 new_posx, new_posy;
+
+            for(u8 i = 0; i < 5; i++)
             {
-                in_play->posx = new_posx;
-                in_play->posy = new_posy;
-                in_play->rotation = rot_copy;
-                ticks_before_glue = 0;
-                return;
-            }
+                new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
+                new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
+                copy.posx = new_posx;
+                copy.posy = new_posy;
+                if(!(check_collision(copy)))
+                {
+                    in_play->posx = new_posx;
+                    in_play->posy = new_posy;
+                    in_play->rotation = rot_copy;
+                    ticks_before_glue = 0;
+                }
+             }
         }
     }
-    else //must be I-type then!
+    else //TGM system, OK
     {
-        u8 rot_orig = in_play->rotation;
-        u8 rot_copy = copy.rotation;
-        u32 new_posx, new_posy;
-
-        for(u8 i = 0; i < 5; i++)
-        {
-            new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
-            new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
-            copy.posx = new_posx;
-            copy.posy = new_posy;
-            if(!(check_collision(copy)))
-            {
-                in_play->posx = new_posx;
-                in_play->posy = new_posy;
-                in_play->rotation = rot_copy;
-                ticks_before_glue = 0;
-
-            }
-        }
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	copy.posx++; //check right
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	copy.posx -= 2; //check left
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	if(copy.type == I_TYPE)//try wallkick first (2 to the right)
+	{
+   	    copy.posx += 3;
+	    if(!check_collision(copy))
+	    {
+		in_play->rotation = copy.rotation;
+		in_play->posx = copy.posx;
+		ticks_before_glue = 0;
+		return;
+	    }
+	    copy.posx -= 2; //reset posx
+	    //try if it will be a floor kick
+	    if(copy.rotation & 1)
+	    {
+        	copy.posy++;
+		copy.rotation = 0; //it really doesn't matter if it's 0 or 2
+		if(check_collision(copy)) //first floor kick try
+		{
+		    copy.posy -= 2; //kick once
+		    copy.rotation = 1;
+		    if(!check_collision(copy))
+		    {
+			in_play->rotation = copy.rotation;
+			in_play->posx = copy.posx;
+			in_play->posy = copy.posy;
+			ARS_glue_lock = 1;
+			ticks_before_glue = cfg.glue_delay;
+			return;
+		    }
+		    copy.posy--; //kick 2 spaces up
+		    if(!check_collision(copy))
+		    {
+			in_play->rotation = copy.rotation;
+			in_play->posx = copy.posx;
+			in_play->posy = copy.posy;
+			ARS_glue_lock = 1;
+			ticks_before_glue = cfg.glue_delay;
+			return;
+		    }
+		}  
+	     }
+	}
+	else if (copy.type == T_TYPE && copy.rotation == 2)
+	{
+	    copy.posy--;
+	    if(!check_collision(copy))
+	    {
+		in_play->rotation = copy.rotation;
+		in_play->posx = copy.posx;
+		in_play->posy = copy.posy;
+		ARS_glue_lock = 1;
+		ticks_before_glue = cfg.glue_delay;
+		return;
+	     }
+	}
     }
+    
 }
 /*
 Rotates the tetrimino to the left (counterclockwise)
@@ -515,49 +844,133 @@ void rotate_counterclockwise()
         ticks_before_glue = 0;
         return;
     }
-    else if(in_play->type != I_TYPE) // J L S T Z types are not I type.
-    {
-        u8 rot_orig = in_play->rotation;
-        u8 rot_copy = copy.rotation;
-        u32 new_posx, new_posy;
+    if(!cfg.ARS)
+    { //SRS
+	    if(in_play->type != I_TYPE) // J L S T Z types are not I type.
+	    {
+		u8 rot_orig = in_play->rotation;
+		u8 rot_copy = copy.rotation;
+		u32 new_posx, new_posy;
 
-        for(u8 i = 0; i < 5; i++)
-        {
-            new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
-            new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
-            copy.posx = new_posx;
-            copy.posy = new_posy;
-            if(!(check_collision(copy)))
-            {
-                in_play->posx = new_posx;
-                in_play->posy = new_posy;
-                in_play->rotation = rot_copy;
-                ticks_before_glue = 0;
-                return;
-            }
-        }
+		for(u8 i = 0; i < 5; i++)
+		{
+		    new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
+		    new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
+		    copy.posx = new_posx;
+		    copy.posy = new_posy;
+		    if(!(check_collision(copy)))
+		    {
+		        in_play->posx = new_posx;
+		        in_play->posy = new_posy;
+		        in_play->rotation = rot_copy;
+		        ticks_before_glue = 0;
+		        return;
+		    }
+		}
+	    }
+	    else //must be I-type then!
+	    {
+		u8 rot_orig = in_play->rotation;
+		u8 rot_copy = copy.rotation;
+		u32 new_posx, new_posy;
+
+		for(u8 i = 0; i < 5; i++)
+		{
+		    new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
+		    new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
+		    copy.posx = new_posx;
+		    copy.posy = new_posy;
+		    if(!(check_collision(copy)))
+		    {
+		        in_play->posx = new_posx;
+		        in_play->posy = new_posy;
+		        in_play->rotation = rot_copy;
+		        ticks_before_glue = 0;
+
+		    }
+		}
+	    }
     }
-    else //must be I-type then!
+    else //ARS
     {
-        u8 rot_orig = in_play->rotation;
-        u8 rot_copy = copy.rotation;
-        u32 new_posx, new_posy;
-
-        for(u8 i = 0; i < 5; i++)
-        {
-            new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
-            new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
-            copy.posx = new_posx;
-            copy.posy = new_posy;
-            if(!(check_collision(copy)))
-            {
-                in_play->posx = new_posx;
-                in_play->posy = new_posy;
-                in_play->rotation = rot_copy;
-                ticks_before_glue = 0;
-
-            }
-        }
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	copy.posx++; //check right
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	copy.posx -= 2; //check left
+	if(!check_collision(copy))
+	{
+	    in_play->rotation = copy.rotation;
+	    in_play->posx = copy.posx;
+	    ticks_before_glue = 0;
+	    return;
+	}
+	if(copy.type == I_TYPE)//try wallkick first (2 to the right)
+	{
+   	    copy.posx += 3;
+	    if(!check_collision(copy))
+	    {
+		in_play->rotation = copy.rotation;
+		in_play->posx = copy.posx;
+		ticks_before_glue = 0;
+		return;
+	    }
+	    copy.posx -= 2; //reset posx
+	    //try if it will be a floor kick
+	    if(copy.rotation & 1)
+	    {
+        	copy.posy++;
+		copy.rotation = 0; //it really doesn't matter if it's 0 or 2
+		if(check_collision(copy)) //first floor kick try
+		{
+		    copy.posy -= 2; //kick once
+		    copy.rotation = 1;
+		    if(!check_collision(copy))
+		    {
+			in_play->rotation = copy.rotation;
+			in_play->posx = copy.posx;
+			in_play->posy = copy.posy;
+			ARS_glue_lock = 1;
+			ticks_before_glue = cfg.glue_delay;
+			return;
+		    }
+		    copy.posy--; //kick 2 spaces up
+		    if(!check_collision(copy))
+		    {
+			in_play->rotation = copy.rotation;
+			in_play->posx = copy.posx;
+			in_play->posy = copy.posy;
+			ARS_glue_lock = 1;
+			ticks_before_glue = cfg.glue_delay;
+			return;
+		    }
+		}  
+	     }
+	}
+	else if (copy.type == T_TYPE && copy.rotation == 2)
+	{
+	    copy.posy--;
+	    if(!check_collision(copy))
+	    {
+		in_play->rotation = copy.rotation;
+		in_play->posx = copy.posx;
+		in_play->posy = copy.posy;
+		ARS_glue_lock = 1;
+		ticks_before_glue = cfg.glue_delay;
+		return;
+	     }
+	}
     }
 }
 
@@ -571,20 +984,40 @@ void glue()
     u32 posy = in_play->posy;
     u8 type = in_play->type;
     u8 rotation = in_play->rotation;
-    if(type != I_TYPE)
-        for(int i = 0; i < 3; ++i)
-            for(int j = 0; j < 3; ++j)
-            {
-		if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
-                level_grid[posx+i][posy+j] |= rotations[type][rotation][j][i];
-            }
-    else
-        for(int i = 0; i < 5; ++i)
-            for(int j = 0; j < 5; ++j)
-            {
-		if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
-                level_grid[posx+i][posy+j] |= rotation_I[rotation][j][i];
-            }
+    if(!cfg.ARS) //SRS
+    {
+        if(type != I_TYPE)
+            for(int i = 0; i < 3; ++i)
+                for(int j = 0; j < 3; ++j)
+                {
+		    if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
+                        level_grid[posx+i][posy+j] |= rotations[type][rotation][j][i];
+                }
+        else
+            for(int i = 0; i < 5; ++i)
+                for(int j = 0; j < 5; ++j)
+                {
+		    if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
+                        level_grid[posx+i][posy+j] |= rotation_I[rotation][j][i];
+                }
+    }
+    else //ARS
+    {
+        if(type != I_TYPE)
+            for(int i = 0; i < 3; ++i)
+                for(int j = 0; j < 3; ++j)
+                {
+		    if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
+                        level_grid[posx+i][posy+j] |= ARS_rotations[type][rotation][j][i];
+                }
+        else
+            for(int i = 0; i < 4; ++i)
+                for(int j = 0; j < 4; ++j)
+                {
+		    if(posx + i >= 0 && posy+j <= DIM_Y && posx + i < DIM_X)
+                        level_grid[posx+i][posy+j] |= ARS_rotation_I[rotation][j][i];
+                }
+    }
     ticks_before_glue = 0;
     last_deployed = in_play;
     u32 lines = check_lines();
@@ -594,7 +1027,7 @@ void glue()
     switch(lines) //todo - if recognized t-spins, award points for line clears too
     {
         case 0: //no lines? try to deploy a new one
-            deploy_next();
+            deploy_next(false);
 	    return;
             break;
         case 1:
@@ -639,7 +1072,7 @@ void update_level()
 {
     render_line_clear = 0;
     clear_lines();
-    deploy_next();
+    deploy_next(false);
 }
 
 void do_gameover()
@@ -661,21 +1094,29 @@ void recursive_list_cleanup(Tetrimino_list* element)
     free(element);
 }
 
-void deploy_next()
+void deploy_next(bool ARE_hold_deploy)
 {
     Tetrimino* to_deploy = next_blocks->tetrimino;
     Tetrimino_list* to_free = next_blocks;
 
     //set the values to default
-    if(to_deploy->type != I_TYPE)
+    if(!cfg.ARS)
     {
-    	to_deploy->posx = 4;
-    	to_deploy->posy = 2;
+	if(to_deploy->type != I_TYPE)
+	{
+	    to_deploy->posx = 4;
+	    to_deploy->posy = 2;
+	}
+	else
+	{
+	    to_deploy->posx = 3;
+	    to_deploy->posy = 1;
+	}
     }
     else
     {
 	to_deploy->posx = 3;
-	to_deploy->posy = 1;
+	to_deploy->posy = 2;
     }
     to_deploy->rotation = 0;
     hold_last = 0;
@@ -693,7 +1134,14 @@ void deploy_next()
     }
     //finally, put it in play
     in_play = to_deploy;
-
+    if(ARE_hold_deploy)
+	return;
+    if(cfg.ARE_delay > 0)
+    {
+	ARE_state = 1;
+	ARE_held = 0;
+	return;
+    }
     if(check_collision(*in_play)) //if it can't spawn, well, it's a game over.
     {
 	do_gameover();
@@ -708,7 +1156,7 @@ void do_hold()
     hold_last = 1;
     Tetrimino* temp = in_play;
     if(hold == NULL)
-        deploy_next();
+        deploy_next(false);
     else
         deploy_hold();
     hold = temp;
@@ -718,13 +1166,13 @@ void deploy_hold()
 {
     if(hold->type != I_TYPE)
     {
-    	hold->posx = 4;
-    	hold->posy = 2;
+	hold->posx = 4;
+	hold->posy = 2;
     }
     else
     {
-   	hold->posx = 3;
-   	hold->posy = 1;
+	hold->posx = 3;
+	hold->posy = 1;
     }
     hold->rotation = 0;
     in_play = hold;
@@ -733,6 +1181,54 @@ void deploy_hold()
 	do_gameover();
     }
 }
+
+void ARE_hold()
+{
+    if(ARE_held || !cfg.hold)
+	return;
+    ARE_held = 1;
+    Tetrimino* temp = in_play;
+    if(hold == NULL)
+    {
+	deploy_next(true);
+    }
+    else
+    {
+	hold->posx = 3;
+	hold->posy = 3;
+	hold->rotation = 0;
+	in_play = hold;
+    }
+    hold = temp;
+}
+
+void ARE_tick()
+{
+    ARE_frames++;
+    if(ARE_frames == cfg.ARE_delay)
+	ARE_finish();
+}
+
+void ARE_cw() //rotate clockwise during ARE
+{
+    in_play->rotation = 1;
+}
+
+void ARE_ccw() //rotate counterclockwise during ARE
+{
+    in_play->rotation = 3;
+}
+
+void ARE_finish()
+{
+    if(check_collision(*in_play)) //if it can't spawn, well, it's a game over.
+    {
+	do_gameover();
+    }
+    ARE_state = 0;
+    ARE_frames = 0;
+}
+
 
 /*
 Sets the array of full_lines, but first it clears it.

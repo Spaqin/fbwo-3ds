@@ -45,6 +45,8 @@ u32 line_clear_frames; //how many frames does the line clear animation last
 u32 frames_per_drop[20]; //how many frames per drop
 u32 rows_per_drop[20]; //how big the drop is
 u32 lines_per_lvl; //how many lines should be cleared before the level is incremented
+u32 ARS; //0 for SRS, 1 for ARS (TGM rotation system)
+u32 ARE_delay; //frames between spawning another block
 }Configuration;
 
 typedef struct{

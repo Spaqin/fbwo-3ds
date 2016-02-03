@@ -23,6 +23,7 @@ u8 playable = 1;
 u8 mode = MODE_TETRIS;
 
 extern u8 level;
+extern u8 ARE_state;
 
 extern u32 high_score;
 
@@ -30,7 +31,7 @@ extern u32 high_score;
 u8 start_held = 0;
 u8 A_held = 0;
 u8 B_held = 0;
-u8 L_held = 0;
+u8 HOLD_held = 0;
 u8 UP_held = 0;
 u8 RIGHT_pressed = 0;
 u8 LEFT_pressed = 0;
@@ -224,7 +225,17 @@ void parse_config(FILE* config_file)
 		}
                 else
                     printf("L\n");
-                
+            }
+            else if(!strcmp(command, "ars\0"))
+            {
+                printf("Rotation system: ");
+                if(val)
+		{
+		    cfg.ARS = 1;
+                    printf("ARS\n");
+		}
+                else
+                    printf("SRS\n");
             }
             else if(!strcmp(command, "next_displayed\0"))
 	    {
@@ -238,6 +249,11 @@ void parse_config(FILE* config_file)
             {
                 printf("Lock delay = %d frames\n", val);
                 cfg.glue_delay = val;
+            }
+            else if(!strcmp(command, "are_delay\0"))
+            {
+                printf("ARE delay = %d frames\n", val);
+                cfg.ARE_delay = val;
             }
             else if(!strcmp(command, "DAS_speed\0"))
             {
@@ -313,6 +329,10 @@ void tetris_control(u32 kDown)
                 rotate_clockwise();
                 A_held = 1;
             }
+	    if(ARE_state)
+	    {
+		ARE_cw();
+	    }
         }
         else
             A_held = 0;
@@ -323,19 +343,28 @@ void tetris_control(u32 kDown)
                 rotate_counterclockwise();
                 B_held = 1;
             }
+	    if(ARE_state)
+	    {
+		ARE_ccw();
+	    }
         }
         else
             B_held = 0;
         if(kDown & KEY_HOLD && cfg.hold)
         {
-            if(!L_held)
+            if(!HOLD_held && !cfg.ARS)
             {
-                do_hold();
-                L_held = 1;
+		if(!ARE_state)
+                    do_hold();
+                HOLD_held = 1; 
             }
+	    else if(ARE_state)
+	    {
+		ARE_hold();
+	    }
         }
         else
-            L_held = 0;
+            HOLD_held = 0;
         if(kDown & KEY_UP)
         {
             if(!UP_held)
@@ -346,7 +375,7 @@ void tetris_control(u32 kDown)
         }
         else
             UP_held = 0;
-        if(kDown & KEY_DOWN)
+        if(kDown & KEY_DOWN && !ARE_state)
         {
             soft_drop();
         }
@@ -354,7 +383,8 @@ void tetris_control(u32 kDown)
         {
             if(!RIGHT_pressed)
             {
-                go_right();
+		if(!ARE_state)
+                    go_right();
                 RIGHT_DAS_count--;
                 RIGHT_pressed = 1;
             }
@@ -362,7 +392,7 @@ void tetris_control(u32 kDown)
             {
                 if(RIGHT_DAS_count <= 0) //yes, it can go below 0
                 {
-                    if(RIGHT_DAS_speed_count == 0)
+                    if(RIGHT_DAS_speed_count == 0 && !ARE_state)
                     {
                         go_right();
                     }
@@ -393,7 +423,8 @@ void tetris_control(u32 kDown)
         {
             if(!LEFT_pressed)
             {
-                go_left();
+		if(!ARE_state)
+                    go_left();
                 LEFT_DAS_count--;
                 LEFT_pressed = 1;
             }
@@ -401,7 +432,7 @@ void tetris_control(u32 kDown)
             {
                 if(LEFT_DAS_count <= 0)
                 {
-                    if(LEFT_DAS_speed_count == 0)
+                    if(LEFT_DAS_speed_count == 0 && !ARE_state)
                     {
                         go_left();
                     }
@@ -446,6 +477,8 @@ int main()
     cfg.hold = 1;
     cfg.line_clear_frames = 40;
     cfg.lines_per_lvl = 10;
+    cfg.ARS = 0;
+    cfg.ARE_delay = 0;
     level = 1;
 	// level:             1   2   3   4   5   6   7   8  9  10 11 12 13 14 15 16 17 19 20 
     static const u32 fpd[] = {30, 28, 27, 24, 20, 15, 10, 8, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1};

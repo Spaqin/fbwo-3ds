@@ -77,6 +77,7 @@ extern Tetrimino* in_play;
 extern Tetrimino* hold;
 
 extern u8* full_lines;
+extern u8 ARE_state;
 
 extern const int rotations[6][4][3][3];
 extern const int rotation_I[4][5][5];

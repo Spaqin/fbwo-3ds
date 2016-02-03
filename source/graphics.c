@@ -133,8 +133,8 @@ void render_frame(int offset)
                                      );
                 if(!paused && !gameover)
                 {
-		    if(controllable)
-		    { //don't render the block while we're clearing lines.
+		    if(controllable && !ARE_state)
+		    { //don't render the block while we're clearing lines nor during ARE.
 		            if(cfg.ghost_piece)
 		                render_block(get_ghost_piece(), true, false, offset);
 
@@ -594,47 +594,95 @@ void graphics_parse_config(char* theme_template)
 
 void render_block(Tetrimino to_render, bool ghost_piece, bool lastdepl, int offset)
 {
-    if(to_render.type != I_TYPE)
-    {
-        int i, j;
-        for(i = 0; i < 3; ++i)
-            for(j = 0; j < 3; ++j)
-            {
-                if(rotations[to_render.type][to_render.rotation][j][i])
-                {
-		    if(to_render.posy + j < 4)
-			continue;
-                    s32 x = grid.posx + blocks[to_render.type]->width * (to_render.posx + i) + offset;
-                    s32 y = grid.posy + blocks[to_render.type]->height * (to_render.posy - 4 + j);
-                    if(ghost_piece)
-                        sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0x88AAAAAA);
-                    else if(lastdepl)
-                        sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFFFFFFF);
-                    else
-                        sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFDDDDDD);
-                }
-            }
+    if(!cfg.ARS)
+    {//SRS
+	    if(to_render.type != I_TYPE)
+	    {
+		int i, j;
+		for(i = 0; i < 3; ++i)
+		    for(j = 0; j < 3; ++j)
+		    {
+		        if(rotations[to_render.type][to_render.rotation][j][i])
+		        {
+			    if(to_render.posy + j < 4)
+				continue;
+		            s32 x = grid.posx + blocks[to_render.type]->width * (to_render.posx + i) + offset;
+		            s32 y = grid.posy + blocks[to_render.type]->height * (to_render.posy - 4 + j);
+		            if(ghost_piece)
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0x88AAAAAA);
+		            else if(lastdepl)
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFFFFFFF);
+		            else
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFDDDDDD);
+		        }
+		    }
+	    }
+	    else
+	    {
+		int i, j;
+		for(i = 0; i < 5; ++i)
+		    for(j = 0; j < 5; ++j)
+		    {
+		        if(rotation_I[to_render.rotation][j][i])
+		        {
+			    if(to_render.posy + j < 4)
+				continue;
+		            s32 x = grid.posx + blocks[I_TYPE]->height * (to_render.posx + i) + offset;
+		            s32 y = grid.posy + blocks[I_TYPE]->width * (to_render.posy - 4 + j);
+		            if(ghost_piece)
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0x88AAAAAA);
+		            else if(lastdepl)
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFFFFFFF);
+		            else
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFDDDDDD);
+		        }
+		    }
+	    }
     }
     else
     {
-        int i, j;
-        for(i = 0; i < 5; ++i)
-            for(j = 0; j < 5; ++j)
-            {
-                if(rotation_I[to_render.rotation][j][i])
-                {
-		    if(to_render.posy + j < 4)
-			continue;
-                    s32 x = grid.posx + blocks[I_TYPE]->height * (to_render.posx + i) + offset;
-                    s32 y = grid.posy + blocks[I_TYPE]->width * (to_render.posy - 4 + j);
-                    if(ghost_piece)
-                        sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0x88AAAAAA);
-                    else if(lastdepl)
-                        sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFFFFFFF);
-                    else
-                        sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFDDDDDD);
-                }
-            }
+		    if(to_render.type != I_TYPE)
+	    {
+		int i, j;
+		for(i = 0; i < 3; ++i)
+		    for(j = 0; j < 3; ++j)
+		    {
+		        if(ARS_rotations[to_render.type][to_render.rotation][j][i])
+		        {
+			    if(to_render.posy + j < 4)
+				continue;
+		            s32 x = grid.posx + blocks[to_render.type]->width * (to_render.posx + i) + offset;
+		            s32 y = grid.posy + blocks[to_render.type]->height * (to_render.posy - 4 + j);
+		            if(ghost_piece)
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0x88AAAAAA);
+		            else if(lastdepl)
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFFFFFFF);
+		            else
+		                sf2d_draw_texture_blend(blocks[to_render.type], x, y, 0xFFDDDDDD);
+		        }
+		    }
+	    }
+	    else
+	    {
+		int i, j;
+		for(i = 0; i < 4; ++i)
+		    for(j = 0; j < 4; ++j)
+		    {
+		        if(ARS_rotation_I[to_render.rotation][j][i])
+		        {
+			    if(to_render.posy + j < 4)
+				continue;
+		            s32 x = grid.posx + blocks[I_TYPE]->height * (to_render.posx + i) + offset;
+		            s32 y = grid.posy + blocks[I_TYPE]->width * (to_render.posy - 4 + j);
+		            if(ghost_piece)
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0x88AAAAAA);
+		            else if(lastdepl)
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFFFFFFF);
+		            else
+		                sf2d_draw_texture_blend(blocks[I_TYPE], x, y, 0xFFDDDDDD);
+		        }
+		    }
+	    }
     }
 }
 void graphics_fini()

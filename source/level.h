@@ -29,6 +29,7 @@ u32 score;
 u32 gravity_frame_counter;
 u32 total_lines;
 u32 high_score;
+u32 ARE_frames;
 
 u8 back_to_back_flag;
 u8 render_line_clear;
@@ -36,13 +37,14 @@ u8 next_counter;
 u8 level;
 u8 gameover;
 u8 hold_last; //flag to disallow infinite holding
+u8 ARE_state;
 
 //function declaration
 void save_highscore();
 void load_highscore();
 int check_collision(const Tetrimino);
 void initialize_game();
-int gravity_drop();
+u32 gravity_drop();
 void increase_ticks();
 void soft_drop();
 Tetrimino get_ghost_piece();
@@ -56,7 +58,7 @@ void glue();
 void update_level();
 void do_gameover();
 void recursive_list_cleanup(Tetrimino_list*);
-void deploy_next();
+void deploy_next(bool);
 void do_hold();
 void deploy_hold();
 int check_lines();
@@ -65,9 +67,11 @@ void clear_lines();
 void move_down();
 Tetrimino_list* generate_bag();
 int rand_lim(int);
-void print_current_status();
-void print_current_state_second_half();
-void print_current_state_first_half();
+void ARE_tick();
+void ARE_hold();
+void ARE_cw();
+void ARE_ccw();
+void ARE_finish();
 
 extern Configuration cfg;
 
@@ -79,6 +83,10 @@ const int rotation_offsets[2][4][5][2];
 //0-6 are all blocks except I-block, which requires 5x5 matrix, so it's in another variable.
 const int rotations[6][4][3][3];
 const int rotation_I[4][5][5];
+
+//and now ARS variants
+const int ARS_rotations[6][4][3][3];
+const int ARS_rotation_I[4][4][4];
 
 #endif // LEVEL_H
 

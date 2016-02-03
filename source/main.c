@@ -39,10 +39,13 @@ u32 LEFT_DAS_count;
 u32 RIGHT_DAS_speed_count = 0;
 u32 LEFT_DAS_speed_count = 0;
 
+u32 KEY_HOLD = KEY_L;
+u32 KEY_DAS = KEY_R;
+
 u8 restartpls = 0;
 u8 config_lvl = 1;
 
-char theme_template[64] = "fbwodata/default/%s";
+char theme_template[64] = "sdmc:/fbwodata/default/%s";
 
 void parse_config(FILE* config_file)
 {
@@ -210,6 +213,19 @@ void parse_config(FILE* config_file)
                     printf("off\n");
                 cfg.ghost_piece = val;
             }
+            else if(!strcmp(command, "r_hold\0"))
+            {
+                printf("Hold button: ");
+                if(val)
+		{
+		    KEY_HOLD = KEY_R;
+		    KEY_DAS = KEY_L;
+                    printf("R\n");
+		}
+                else
+                    printf("L\n");
+                
+            }
             else if(!strcmp(command, "next_displayed\0"))
 	    {
                 if(val >= 0 && val < 7)
@@ -255,7 +271,7 @@ void parse_config(FILE* config_file)
             if(!strcmp("theme", command));
             {
                 printf("theme %s\n", theme_folder_name);
-                sprintf(theme_template, "fbwodata/%s/%%s", theme_folder_name);
+                sprintf(theme_template, "sdmc:/fbwodata/%s/%%s", theme_folder_name);
             }
         }
     }
@@ -310,7 +326,7 @@ void tetris_control(u32 kDown)
         }
         else
             B_held = 0;
-        if(kDown & KEY_L && cfg.hold)
+        if(kDown & KEY_HOLD && cfg.hold)
         {
             if(!L_held)
             {
@@ -350,7 +366,7 @@ void tetris_control(u32 kDown)
                     {
                         go_right();
                     }
-                    if(kDown & KEY_R)
+                    if(kDown & KEY_DAS)
 			if(RIGHT_DAS_speed_count > (cfg.DAS_speed >> 1))
 			    RIGHT_DAS_speed_count = 0;
 			else
@@ -360,7 +376,7 @@ void tetris_control(u32 kDown)
                 }
                 else
                 {
-                    if(kDown & KEY_R)
+                    if(kDown & KEY_DAS)
                         RIGHT_DAS_count--; //boost the DAS!
                     RIGHT_DAS_count--;
                 } // end RIGHT_DAS_count if
@@ -389,7 +405,7 @@ void tetris_control(u32 kDown)
                     {
                         go_left();
                     }
-                    if(kDown & KEY_R)
+                    if(kDown & KEY_DAS)
 			if(LEFT_DAS_speed_count > (cfg.DAS_speed >> 1))
 			    LEFT_DAS_speed_count = 0;
 		        else
@@ -399,7 +415,7 @@ void tetris_control(u32 kDown)
                 }
                 else
                 {
-                    if(kDown & KEY_R)
+                    if(kDown & KEY_DAS)
                         LEFT_DAS_count--; //boost the DAS!
                     LEFT_DAS_count--;
                 } // end LEFT_DAS_count if
@@ -441,7 +457,7 @@ int main()
     //load textures
 
     printf("reading config...\n");
-    FILE* config = fopen("fbwodata/config.cfg", "r");
+    FILE* config = fopen("sdmc:/fbwodata/config.cfg", "r");
     if(config != NULL)
         parse_config(config);
     else

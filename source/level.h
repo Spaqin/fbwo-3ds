@@ -38,6 +38,8 @@ u8 level;
 u8 gameover;
 u8 hold_last; //flag to disallow infinite holding
 u8 ARE_state;
+u8 last_T_rotation;
+u8 last_T_kick;
 
 //function declaration
 void save_highscore();
@@ -54,6 +56,7 @@ void go_left();
 void go_right();
 void rotate_clockwise();
 void rotate_counterclockwise();
+void apply_rotation();
 void glue();
 void update_level();
 void do_gameover();
@@ -72,6 +75,7 @@ void ARE_hold();
 void ARE_cw();
 void ARE_ccw();
 void ARE_finish();
+u32 T_corners_occupied();
 
 extern Configuration cfg;
 

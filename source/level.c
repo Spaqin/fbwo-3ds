@@ -587,6 +587,7 @@ u32 gravity_drop()
     else //nothing below - just go down
     {
         in_play->posy++;
+	last_T_rotation = 0;
 	if(!cfg.ARS || !ARS_glue_lock)
 	    ticks_before_glue = 0;
         return 1;
@@ -659,7 +660,9 @@ int go_all_down()
     score += rows << 1; //2 points per tile dropped
     if(score > high_score)
 	high_score = score;
-    glue();
+    last_T_rotation = 0;
+    if(!cfg.ARS) //sonic drop!
+    	glue();
     return rows;
 }
 /*
@@ -672,6 +675,7 @@ void go_left()
     if(!check_collision(copy))
     {
         in_play->posx--;
+	last_T_rotation = 0;
 	if(!cfg.ARS || !ARS_glue_lock)
 	    ticks_before_glue = 0;
     }
@@ -686,6 +690,7 @@ void go_right()
     if(!check_collision(copy))
     {
         in_play->posx++;
+	last_T_rotation = 0;
 	if(!cfg.ARS || !ARS_glue_lock)
 	    ticks_before_glue = 0;
     }
@@ -697,6 +702,24 @@ void rotate_clockwise()
 {
     Tetrimino copy = *in_play;
     copy.rotation = (copy.rotation + 1) % 4;
+    apply_rotation(copy);
+}
+
+/*
+Rotates the tetrimino to the left (counterclockwise)
+*/
+void rotate_counterclockwise()
+{
+    Tetrimino copy = *in_play;
+    copy.rotation = (copy.rotation + 3) % 4; //3 is -1 % 4
+    apply_rotation(copy);
+}
+
+/*
+Actually does all the checks for the copy.
+*/
+void apply_rotation(Tetrimino copy)
+{
     if(in_play->type == O_TYPE)
     {
         ticks_before_glue = 0;
@@ -714,7 +737,6 @@ void rotate_clockwise()
 	    {
 		new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
 		new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
-		//to do? recognize T-spins
 		copy.posx = new_posx;
 		copy.posy = new_posy;
 		if(!(check_collision(copy)))
@@ -722,6 +744,10 @@ void rotate_clockwise()
 		    in_play->posx = new_posx;
 		    in_play->posy = new_posy;
 		    in_play->rotation = rot_copy;
+
+			last_T_rotation = 1; //actually we don't check if it's T, cause we need to check that only during locking and branches are bad, my professor told me.
+			last_T_kick = i != 0; //if it's basic rotation, then the reward will be bigger for no lines/singles
+
 		    ticks_before_glue = 0;
 		    return;
 		}
@@ -751,7 +777,7 @@ void rotate_clockwise()
     }
     else //TGM system, OK
     {
-	if(!check_collision(copy))
+	if(!check_collision(copy)) //basic test
 	{
 	    in_play->rotation = copy.rotation;
 	    in_play->posx = copy.posx;
@@ -816,7 +842,7 @@ void rotate_clockwise()
 		}  
 	     }
 	}
-	else if (copy.type == T_TYPE && copy.rotation == 2)
+	else if (copy.type == T_TYPE && copy.rotation == 2) //try a kick up... dunno if it should be a T-spin.
 	{
 	    copy.posy--;
 	    if(!check_collision(copy))
@@ -832,147 +858,7 @@ void rotate_clockwise()
     }
     
 }
-/*
-Rotates the tetrimino to the left (counterclockwise)
-*/
-void rotate_counterclockwise()
-{
-    Tetrimino copy = *in_play;
-    copy.rotation = (copy.rotation + 3) % 4; //3 is -1 % 4
-    if(in_play->type == O_TYPE)
-    {
-        ticks_before_glue = 0;
-        return;
-    }
-    if(!cfg.ARS)
-    { //SRS
-	    if(in_play->type != I_TYPE) // J L S T Z types are not I type.
-	    {
-		u8 rot_orig = in_play->rotation;
-		u8 rot_copy = copy.rotation;
-		u32 new_posx, new_posy;
 
-		for(u8 i = 0; i < 5; i++)
-		{
-		    new_posx = in_play->posx + rotation_offsets[0][rot_orig][i][0] - rotation_offsets[0][rot_copy][i][0];
-		    new_posy = in_play->posy + rotation_offsets[0][rot_orig][i][1] - rotation_offsets[0][rot_copy][i][1];
-		    copy.posx = new_posx;
-		    copy.posy = new_posy;
-		    if(!(check_collision(copy)))
-		    {
-		        in_play->posx = new_posx;
-		        in_play->posy = new_posy;
-		        in_play->rotation = rot_copy;
-		        ticks_before_glue = 0;
-		        return;
-		    }
-		}
-	    }
-	    else //must be I-type then!
-	    {
-		u8 rot_orig = in_play->rotation;
-		u8 rot_copy = copy.rotation;
-		u32 new_posx, new_posy;
-
-		for(u8 i = 0; i < 5; i++)
-		{
-		    new_posx = in_play->posx + rotation_offsets[1][rot_orig][i][0] - rotation_offsets[1][rot_copy][i][0];
-		    new_posy = in_play->posy + rotation_offsets[1][rot_orig][i][1] - rotation_offsets[1][rot_copy][i][1];
-		    copy.posx = new_posx;
-		    copy.posy = new_posy;
-		    if(!(check_collision(copy)))
-		    {
-		        in_play->posx = new_posx;
-		        in_play->posy = new_posy;
-		        in_play->rotation = rot_copy;
-		        ticks_before_glue = 0;
-
-		    }
-		}
-	    }
-    }
-    else //ARS
-    {
-	if(!check_collision(copy))
-	{
-	    in_play->rotation = copy.rotation;
-	    in_play->posx = copy.posx;
-	    ticks_before_glue = 0;
-	    return;
-	}
-	copy.posx++; //check right
-	if(!check_collision(copy))
-	{
-	    in_play->rotation = copy.rotation;
-	    in_play->posx = copy.posx;
-	    ticks_before_glue = 0;
-	    return;
-	}
-	copy.posx -= 2; //check left
-	if(!check_collision(copy))
-	{
-	    in_play->rotation = copy.rotation;
-	    in_play->posx = copy.posx;
-	    ticks_before_glue = 0;
-	    return;
-	}
-	if(copy.type == I_TYPE)//try wallkick first (2 to the right)
-	{
-   	    copy.posx += 3;
-	    if(!check_collision(copy))
-	    {
-		in_play->rotation = copy.rotation;
-		in_play->posx = copy.posx;
-		ticks_before_glue = 0;
-		return;
-	    }
-	    copy.posx -= 2; //reset posx
-	    //try if it will be a floor kick
-	    if(copy.rotation & 1)
-	    {
-        	copy.posy++;
-		copy.rotation = 0; //it really doesn't matter if it's 0 or 2
-		if(check_collision(copy)) //first floor kick try
-		{
-		    copy.posy -= 2; //kick once
-		    copy.rotation = 1;
-		    if(!check_collision(copy))
-		    {
-			in_play->rotation = copy.rotation;
-			in_play->posx = copy.posx;
-			in_play->posy = copy.posy;
-			ARS_glue_lock = 1;
-			ticks_before_glue = cfg.glue_delay;
-			return;
-		    }
-		    copy.posy--; //kick 2 spaces up
-		    if(!check_collision(copy))
-		    {
-			in_play->rotation = copy.rotation;
-			in_play->posx = copy.posx;
-			in_play->posy = copy.posy;
-			ARS_glue_lock = 1;
-			ticks_before_glue = cfg.glue_delay;
-			return;
-		    }
-		}  
-	     }
-	}
-	else if (copy.type == T_TYPE && copy.rotation == 2)
-	{
-	    copy.posy--;
-	    if(!check_collision(copy))
-	    {
-		in_play->rotation = copy.rotation;
-		in_play->posx = copy.posx;
-		in_play->posy = copy.posy;
-		ARS_glue_lock = 1;
-		ticks_before_glue = cfg.glue_delay;
-		return;
-	     }
-	}
-    }
-}
 
 
 /*
@@ -1024,26 +910,54 @@ void glue()
     total_lines += lines;
     u32 score_to_add = 0;
     u8 back_to_back_flag_old = back_to_back_flag;
-    switch(lines) //todo - if recognized t-spins, award points for line clears too
+    switch(lines) //todo - maybe add graphical effects for T-spins
     {
         case 0: //no lines? try to deploy a new one
+	    if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
+	    {
+		score_to_add = level * last_T_kick ? 100 : 400;
+	    }
             deploy_next(false);
 	    return;
             break;
         case 1:
-            score_to_add += level * 100;
-            back_to_back_flag = 0;
+	    if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
+	    {
+		score_to_add = level * last_T_kick ? 200 : 800;
+		back_to_back_flag = 1;
+   	    }
+	    else
+	    {
+            	score_to_add = level * 100;
+            	back_to_back_flag = 0;
+	    }
             break;
         case 2:
-            score_to_add += level * 300;
-            back_to_back_flag = 0;
+            if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
+	    {
+		score_to_add = level * 1200;
+		back_to_back_flag = 1;
+	    }
+	    else
+	    {
+            	score_to_add = level * 300;
+            	back_to_back_flag = 0;
+	    }
             break;
         case 3:
-            score_to_add += level * 500;
-            back_to_back_flag = 0;
+            if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
+	    {
+		score_to_add = level * 1600;
+		back_to_back_flag = 1;
+	    }
+	    else
+	    {
+            	score_to_add = level * 500;
+            	back_to_back_flag = 0;
+	    }
             break;
         case 4:
-            score_to_add += level * 800;
+            score_to_add = level * 800;
             back_to_back_flag = 1;
             break;
     }
@@ -1091,6 +1005,7 @@ void recursive_list_cleanup(Tetrimino_list* element)
     if(element == NULL)
         return;
     recursive_list_cleanup(element->next);
+    free(element->tetrimino);
     free(element);
 }
 
@@ -1115,6 +1030,7 @@ void deploy_next(bool ARE_hold_deploy)
     }
     else
     {
+	ARS_glue_lock = 0;
 	to_deploy->posx = 3;
 	to_deploy->posy = 2;
     }
@@ -1344,6 +1260,22 @@ Tetrimino_list* generate_bag()
     element->next->next = NULL;
 
     return first;
+}
+
+u32 T_corners_occupied()
+{
+    u32 posx = in_play->posx;
+    u32 posy = in_play->posy;
+    u32 corners_occupied = 0;
+    for(u32 i = 0; i <= 2; i += 2)
+	for(u32 j = 0; j <= 2; j += 2)
+	{
+	    if(posx + j < 0 || posx + j >= DIM_X || level_grid[posx+j][posy+i] || posy + i >= DIM_Y) //the corner is too much to the left/right/something's already there/too low
+	    {
+		++corners_occupied;
+	    }
+	}
+    return corners_occupied;
 }
 
 int rand_lim(int limit) {

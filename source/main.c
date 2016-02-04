@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,11 +6,6 @@
 #include "structs.h"
 #include "level.h"
 #include "graphics.h"
-
-
-#define STACKSIZE 4096
-
-
 
 Configuration cfg;
 

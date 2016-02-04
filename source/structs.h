@@ -21,6 +21,8 @@
 
 #include <sf2d.h>
 
+typedef enum { NONE, TETRIS, TSPIN, TSPINSINGLE, TSPINDOUBLE, TSPINTRIPLE} Indicator_to_render;
+
 typedef struct{
 u32 posx; //top left corner postition
 u32 posy;

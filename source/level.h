@@ -40,6 +40,9 @@ u8 hold_last; //flag to disallow infinite holding
 u8 ARE_state;
 u8 last_T_rotation;
 u8 last_T_kick;
+u8 back_to_back_flag_old;
+
+Indicator_to_render indicator;
 
 //function declaration
 void save_highscore();

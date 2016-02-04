@@ -202,13 +202,97 @@ void render_frame(int offset)
                                                         grid.posy + (i-4) * blocks[0]->height,
                                                         grid.texture->width,
                                                         blocks[0]->height,
-                                                        RGBA8(0xFF, rand() % 255, rand() % 255, rand() % 255)
+                                                        RGBA8(rand() % 255, rand() % 255, rand() % 255, rand() % 255)
                                                        );
                                 }
                             }
                             remove_line_count++;
                         }
                     }
+		    if(indicator_frames >= indicator_frame_config)
+			indicator = NONE;
+		    switch(indicator)
+		    {
+			case NONE:
+			    indicator_frames = 0;
+			    break;
+			case TETRIS:
+			    if(tetris_indicator)
+				sf2d_draw_texture(
+					   	  tetris_indicator,
+						  indicatorx + offset,
+						  indicatory
+						 );
+			    if(back_to_back_flag_old && backtoback_indicator)
+				sf2d_draw_texture(
+					   	  backtoback_indicator,
+						  indicatorx + offset,
+						  indicatory + tetris_indicator->height
+						 );
+			    indicator_frames++;
+			    break;
+			case TSPIN:
+			    if(tspin_indicator)
+				sf2d_draw_texture(
+					   	  tspin_indicator,
+						  indicatorx + offset,
+						  indicatory
+						 );
+			    if(back_to_back_flag_old && backtoback_indicator)
+				sf2d_draw_texture(
+					   	  backtoback_indicator,
+						  indicatorx + offset,
+						  indicatory + tspin_indicator->height
+						 );
+			    indicator_frames++;
+			    break;
+			case TSPINSINGLE:
+			    if(tspinsingle_indicator)
+				sf2d_draw_texture(
+					   	  tspinsingle_indicator,
+						  indicatorx + offset,
+						  indicatory
+						 );
+			    if(back_to_back_flag_old && backtoback_indicator)
+				sf2d_draw_texture(
+					   	  backtoback_indicator,
+						  indicatorx + offset,
+						  indicatory + tspinsingle_indicator->height
+						 );
+			    indicator_frames++;
+			    break;
+			case TSPINDOUBLE:
+			    if(tspindouble_indicator)
+				sf2d_draw_texture(
+					   	  tspindouble_indicator,
+						  indicatorx + offset,
+						  indicatory
+						 );
+			    if(back_to_back_flag_old && backtoback_indicator)
+				sf2d_draw_texture(
+					   	  backtoback_indicator,
+						  indicatorx + offset,
+						  indicatory + tspindouble_indicator->height
+						 );
+			    indicator_frames++;
+			    break;
+			case TSPINTRIPLE:
+			    if(tspintriple_indicator)
+				sf2d_draw_texture(
+					   	  tspintriple_indicator,
+						  indicatorx + offset,
+						  indicatory
+						 );
+			    if(back_to_back_flag_old && backtoback_indicator)
+				sf2d_draw_texture(
+					   	  backtoback_indicator,
+						  indicatorx + offset,
+						  indicatory + tspintriple_indicator->height
+						 );
+			    indicator_frames++;
+			    break;
+
+		    }
                 }//end not paused/gameover if
                 else if(paused)
                 {
@@ -444,16 +528,42 @@ int load_textures(const char* str_template)
         return 0;
     }
 
+//these are not critical. if they are unavailable, I just won't render them, also for backwards compatibility.
+
+    sprintf(buffer, str_template, "quadline.png");
+    tetris_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
+    sprintf(buffer, str_template, "tspin.png");
+    tspin_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
+    sprintf(buffer, str_template, "tspinsingle.png");
+    tspinsingle_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
+    sprintf(buffer, str_template, "tspindouble.png");
+    tspindouble_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
+    sprintf(buffer, str_template, "tspintriple.png");
+    tspintriple_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
+    sprintf(buffer, str_template, "backtoback.png");
+    backtoback_indicator = sfil_load_PNG_file(buffer, SF2D_PLACE_RAM);
+
     block_offset_holdx = DEFAULT_OFFSET_HOLDX;
     block_offset_holdy = DEFAULT_OFFSET_HOLDY;
     block_offset_nextx = DEFAULT_OFFSET_NEXTX;
     block_offset_nexty = DEFAULT_OFFSET_NEXTY;
     digit_offset_linesy = DEFAULT_OFFSET_LNSY;
     digit_offset_levely = DEFAULT_OFFSET_LVLY;
+    indicatorx = DEFAULT_POPUPX;
+    indicatory = DEFAULT_POPUPY;
+    indicator_frame_config = DEFAULT_POPUP_FRAME_CFG;
     return 1;
 }
 
 
+/*
+Initializes graphics.
+*/
 void graphics_init()
 {
     sf2d_init();
@@ -462,9 +572,9 @@ void graphics_init()
     consoleInit(GFX_BOTTOM, NULL);
 }
 
-
-
-
+/*
+Parses theme.cfg.
+*/
 void graphics_parse_config(char* theme_template)
 {
     char buffer[80];
@@ -574,6 +684,12 @@ void graphics_parse_config(char* theme_template)
                 block_offset_holdx = valx;
                 block_offset_holdy = valy;
             }
+            else if(!strcmp(command, "indicators"))
+            {
+                printf("indicators = [%ld, %ld]\n", valx, valy);
+                indicatorx = valx;
+                indicatory = valy;
+            }
         }
         else if(sscanf(buffer, "%s %ld", command, &valx) == 2)
         {
@@ -586,6 +702,11 @@ void graphics_parse_config(char* theme_template)
             {
                 printf("level digit offset = %ld\n", valx);
                 digit_offset_levely = valx;
+            }
+	    else if(!strcmp(command, "indicator_frames"))
+            {
+                printf("indicator frame time = %ld\n", valx);
+                indicator_frame_config = valx;
             }
 	}
     }

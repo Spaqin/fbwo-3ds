@@ -56,6 +56,11 @@
 #define DEFAULT_OFFSET_LVLY	10
 #define DEFAULT_OFFSET_LNSY	10
 
+#define DEFAULT_POPUPX		270
+#define DEFAULT_POPUPY		180
+
+#define DEFAULT_POPUP_FRAME_CFG	40
+
 void render_grid_blocks(int);
 void render_block(Tetrimino, bool, bool, int);
 void render_frames();
@@ -65,13 +70,15 @@ void graphics_fini();
 void graphics_init();
 int load_textures(const char*);
 
-extern u8 mode;
 extern int level_grid[DIM_X][DIM_Y];
 extern u32 score;
 extern u32 high_score;
 extern u32 total_lines;
 extern u8 paused;
 extern u8 controllable;
+extern u8 back_to_back_flag;
+extern u8 mode;
+extern Indicator_to_render indicator;
 
 extern Tetrimino* in_play;
 extern Tetrimino* hold;
@@ -101,6 +108,13 @@ sf2d_texture* misc_num[10];
 sf2d_texture* gameover_text;
 sf2d_texture* paused_text;
 
+sf2d_texture* tetris_indicator;
+sf2d_texture* tspin_indicator;
+sf2d_texture* tspinsingle_indicator;
+sf2d_texture* tspindouble_indicator;
+sf2d_texture* tspintriple_indicator;
+sf2d_texture* backtoback_indicator;
+
 s32 block_offset_holdx;
 s32 block_offset_holdy;
 
@@ -111,5 +125,11 @@ s32 remove_line_count;
 
 s32 digit_offset_linesy;
 s32 digit_offset_levely;
+
+s32 indicatorx;
+s32 indicatory;
+
+s32 indicator_frames;
+s32 indicator_frame_config;
 
 #endif // GRAPHICS_H

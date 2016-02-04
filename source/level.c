@@ -567,6 +567,8 @@ void initialize_game()
     ARE_frames = 0;
     ARE_held = 0;
     ARS_glue_lock = 0;
+    back_to_back_flag = 0;
+    back_to_back_flag_old = 0;
     deploy_next(false);
 }
 
@@ -578,19 +580,19 @@ u32 gravity_drop()
 {
     Tetrimino new_pos = *in_play;
     new_pos.posy++;
-    if(check_collision(new_pos)) //means that there's something below
-    {
-        if(ticks_before_glue >= cfg.glue_delay)
-            glue();
-        return 0;
-    }
-    else //nothing below - just go down
+    if(!check_collision(new_pos)) //nothing below - just go down
     {
         in_play->posy++;
 	last_T_rotation = 0;
 	if(!cfg.ARS || !ARS_glue_lock)
 	    ticks_before_glue = 0;
         return 1;
+    }
+    else
+    {
+	if(ticks_before_glue >= cfg.glue_delay)
+            glue();
+	return 0;
     }
 }
 
@@ -601,7 +603,10 @@ void increase_ticks()
     if(check_collision(new_pos)) //means that there's something below, so we count down
     {
         ticks_before_glue++;
+	if(ticks_before_glue >= cfg.glue_delay)
+            glue();
     }
+
 }
 
 void do_gravity()
@@ -909,13 +914,14 @@ void glue()
     u32 lines = check_lines();
     total_lines += lines;
     u32 score_to_add = 0;
-    u8 back_to_back_flag_old = back_to_back_flag;
+    back_to_back_flag_old = back_to_back_flag;
     switch(lines) //todo - maybe add graphical effects for T-spins
     {
         case 0: //no lines? try to deploy a new one
 	    if(!cfg.ARS && in_play->type == T_TYPE && last_T_rotation && T_corners_occupied() >= 3)
 	    {
 		score_to_add = level * last_T_kick ? 100 : 400;
+		indicator = TSPIN;
 	    }
             deploy_next(false);
 	    return;
@@ -925,6 +931,7 @@ void glue()
 	    {
 		score_to_add = level * last_T_kick ? 200 : 800;
 		back_to_back_flag = 1;
+		indicator = TSPINSINGLE;
    	    }
 	    else
 	    {
@@ -937,6 +944,7 @@ void glue()
 	    {
 		score_to_add = level * 1200;
 		back_to_back_flag = 1;
+		indicator = TSPINDOUBLE;
 	    }
 	    else
 	    {
@@ -949,6 +957,7 @@ void glue()
 	    {
 		score_to_add = level * 1600;
 		back_to_back_flag = 1;
+		indicator = TSPINTRIPLE;
 	    }
 	    else
 	    {
@@ -959,6 +968,7 @@ void glue()
         case 4:
             score_to_add = level * 800;
             back_to_back_flag = 1;
+	    indicator = TETRIS;
             break;
     }
     if(back_to_back_flag_old)

@@ -238,12 +238,6 @@ void render_frame(int offset)
 						  indicatorx + offset,
 						  indicatory
 						 );
-			    if(back_to_back_flag_old && backtoback_indicator)
-				sf2d_draw_texture(
-					   	  backtoback_indicator,
-						  indicatorx + offset,
-						  indicatory + tspin_indicator->height
-						 );
 			    indicator_frames++;
 			    break;
 			case TSPINSINGLE:

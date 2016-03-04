@@ -6,6 +6,7 @@
 #include "structs.h"
 #include "level.h"
 #include "graphics.h"
+#include "audio.h"
 
 Configuration cfg;
 
@@ -294,14 +295,16 @@ void tetris_control(u32 kDown)
     {
         if(!start_held)
         {
-	    if(gameover)
-	    {
-		playable = 0;
-		return;
-	    }
+	    	if(gameover)
+	    	{
+				playable = 0;
+				return;
+	    	}
             paused = !paused;
-            start_held = 1;
+			if(!paused)
+				audio_music_play();
 
+            start_held = 1;
         }
     }
 
@@ -309,10 +312,10 @@ void tetris_control(u32 kDown)
         start_held = 0;
     if (kDown & KEY_SELECT)
     {
-	if(!gameover && (kDown & KEY_START))
-	    playable = 0;
-	if(gameover && playable)
-	    restartpls = 1;
+		if(!gameover && (kDown & KEY_START))
+	 	   playable = 0;
+		if(gameover && playable)
+	    	restartpls = 1;
     }
     if(!paused && controllable && !gameover)
     {
@@ -461,7 +464,6 @@ void tetris_control(u32 kDown)
 int main()
 {
     graphics_init();
-
     //init config w/ def. values
     cfg.DAS = 11;
     cfg.DAS_speed = 6;
@@ -496,6 +498,10 @@ int main()
 
     graphics_parse_config(theme_template);
 
+
+	audio_init(theme_template);
+
+
     //game init
     init:
     initialize_game();
@@ -516,9 +522,16 @@ int main()
         {
             case MODE_TETRIS:
                 tetris_control(kDown);
-		if(!paused && controllable && !gameover)
-		    do_gravity();
+				if(!paused  && !gameover)
+				{
+					audio_music_check();
+					if(controllable)
+		    			do_gravity();
+				}
+				else
+					audio_music_pause();
                 render_frames();
+				
 		
                 break;
             //the following are still in "to-do" - not critical to gameplay
@@ -531,7 +544,7 @@ int main()
 	sf2d_swapbuffers();
     }
     if(restartpls)
-	goto init;
+		goto init;
     goto exit;
 
 
@@ -551,5 +564,6 @@ int main()
     save_highscore();
     printf("exitting...\n");
     graphics_fini();
+	audio_fini();
     return 0;
 }

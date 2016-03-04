@@ -1,5 +1,6 @@
 #include "level.h"
 #include "structs.h"
+#include "audio.h"
 #include <3ds.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -922,6 +923,7 @@ void glue()
 	    {
 		score_to_add = level * last_T_kick ? 100 : 400;
 		indicator = TSPIN;
+		back_to_back_flag = 0;
 	    }
             deploy_next(false);
 	    return;
@@ -971,7 +973,7 @@ void glue()
 	    indicator = TETRIS;
             break;
     }
-    if(back_to_back_flag_old)
+    if(back_to_back_flag_old && back_to_back_flag)
     {
         score_to_add *= 3;
         score_to_add >>= 1;
@@ -1001,22 +1003,26 @@ void update_level()
 
 void do_gameover()
 {
+	ndspChnSetPaused(music.chnl, true);
     gameover = 1;
     //clean up
-    free(next_blocks); //i don't feel like freeing everything tbh ://
+    iterative_list_cleanup(next_blocks);
     free(in_play);
     free(hold);
     free(full_lines);
+
     save_highscore();
 }
 
-void recursive_list_cleanup(Tetrimino_list* element)
+void iterative_list_cleanup(Tetrimino_list* element)
 {
-    if(element == NULL)
-        return;
-    recursive_list_cleanup(element->next);
-    free(element->tetrimino);
-    free(element);
+	while(element != NULL)
+	{
+		Tetrimino_list* tmp = element;
+		element = element->next;
+		free(tmp->tetrimino);
+		free(tmp);
+	}
 }
 
 void deploy_next(bool ARE_hold_deploy)
@@ -1061,16 +1067,16 @@ void deploy_next(bool ARE_hold_deploy)
     //finally, put it in play
     in_play = to_deploy;
     if(ARE_hold_deploy)
-	return;
+		return;
     if(cfg.ARE_delay > 0)
     {
-	ARE_state = 1;
-	ARE_held = 0;
-	return;
+		ARE_state = 1;
+		ARE_held = 0;
+		return;
     }
     if(check_collision(*in_play)) //if it can't spawn, well, it's a game over.
     {
-	do_gameover();
+		do_gameover();
     }
 
 }

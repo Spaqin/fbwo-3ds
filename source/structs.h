@@ -20,6 +20,7 @@
 #define MODE_SETTINGS 3
 
 #include <sf2d.h>
+#include <stdio.h>
 
 typedef enum { NONE, TETRIS, TSPIN, TSPINSINGLE, TSPINDOUBLE, TSPINTRIPLE} Indicator_to_render;
 
@@ -57,5 +58,21 @@ s32 posx;
 s32 posy;
 } image;
 
+typedef struct{
+u32 chnl; //channel used to play
+u32 channels;
+u32 sample_rate;
+u32 bits_per_sample;
+u32 data_size;
+u32 total_buffer_size;
+u32 last_check;
+u16 bytes_per_sample;
+u16 ndsp_format;
+ndspWaveBuf* first;
+ndspWaveBuf* second;
+u8* first_data;
+u8* second_data;
+FILE* file;
+} Music;
 #endif
 

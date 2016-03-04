@@ -63,7 +63,7 @@ void apply_rotation();
 void glue();
 void update_level();
 void do_gameover();
-void recursive_list_cleanup(Tetrimino_list*);
+void iterative_list_cleanup(Tetrimino_list*);
 void deploy_next(bool);
 void do_hold();
 void deploy_hold();

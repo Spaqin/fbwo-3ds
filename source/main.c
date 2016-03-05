@@ -491,15 +491,15 @@ int main()
         parse_config(config);
     else
         printf("failed to read config! default values will be used.\n");
+
+	audio_init(theme_template); //some of the loading operations will be in another thread so maybe it will be a bit faster
+
     if(!load_textures(theme_template))
 	goto texture_error;
     RIGHT_DAS_count = cfg.DAS;
     LEFT_DAS_count = cfg.DAS;
 
     graphics_parse_config(theme_template);
-
-
-	audio_init(theme_template);
 
 
     //game init

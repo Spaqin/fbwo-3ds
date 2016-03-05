@@ -21,6 +21,7 @@
 
 #include <sf2d.h>
 #include <stdio.h>
+#include "include/vorbisfile.h"
 
 typedef enum { NONE, TETRIS, TSPIN, TSPINSINGLE, TSPINDOUBLE, TSPINTRIPLE} Indicator_to_render;
 
@@ -72,7 +73,7 @@ ndspWaveBuf* first;
 ndspWaveBuf* second;
 u8* first_data;
 u8* second_data;
-FILE* file;
+OggVorbis_File* file;
 } Music;
 #endif
 

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "include/vorbisfile.h"
+
 #include "structs.h"
 #include "audio.h"
 
@@ -18,79 +20,59 @@ u8 audio_init(const char* template)
 	music_loaded = false;
 
     char buffer[80];
-    sprintf(buffer, template, "music.wav");
+    sprintf(buffer, template, "music.ogg");
 
-    music.file = fopen(buffer, "rb");
-    if (!music.file)
+	music.file = malloc(sizeof(OggVorbis_File));
+
+    int result = ov_fopen(buffer, music.file);
+    if (result < 0)
     {
-		printf("failed to open music.wav\n");
+		printf("failed to open music.ogg\n");
 		return 1;
     }
 
-    char signature[4];
-	
-    fread(signature, 1, 4, music.file);
-	
-    if( signature[0] != 'R' &&
-		signature[1] != 'I' &&
-		signature[2] != 'F' &&
-		signature[3] != 'F')
-    {
-		printf("Wrong file format.\n");
-		fclose(music.file);
-		return 1;
-    }
+	vorbis_info* vi = ov_info(music.file, -1);
 
-	fseek(music.file, 40, SEEK_SET);
-	fread(&music.data_size, 4, 1, music.file);
-	fseek(music.file, 22, SEEK_SET);
-	fread(&music.channels, 2, 1, music.file);
-	fseek(music.file, 24, SEEK_SET);
-	fread(&music.sample_rate, 4, 1, music.file);
-	fseek(music.file, 34, SEEK_SET);
-	fread(&music.bits_per_sample, 2, 1, music.file);
+	music.sample_rate = vi->rate;
 
-	if(music.data_size == 0 || (music.channels != 1 && music.channels != 2) ||
-		(music.bits_per_sample != 8 && music.bits_per_sample != 16))
+							//samples/bytes per sample/stereo
+	music.total_buffer_size = BUFFER_SIZE * 2 * 2;
+	
+	music.first_data = linearAlloc(music.total_buffer_size);	
+	music.second_data = linearAlloc(music.total_buffer_size);
+
+	if(!music.first_data || !music.second_data)
 	{
-		printf("Corrupted wav file.\n");
-		fclose(music.file);
+		printf("error allocating music memory\n");
 		return 1;
 	}
+
 
 	music.chnl = MUSIC_CHANNEL;
+	music.ndsp_format = vi->channels == 1 ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16;
+	music.bytes_per_sample = 2;
 
-	
-	if(music.bits_per_sample == 8)
-	{
-		music.ndsp_format = (music.channels == 1) ?
-			NDSP_FORMAT_MONO_PCM8 :
-			NDSP_FORMAT_STEREO_PCM8;
-	}
-	else
-	{
-		music.ndsp_format = (music.channels == 1) ?
-			NDSP_FORMAT_MONO_PCM16 :
-			NDSP_FORMAT_STEREO_PCM16;
-	}
-	fseek(music.file, 44, SEEK_SET); //set the file pointer to the beginning of sound data
 
-	music.bytes_per_sample = music.bits_per_sample >> 3;
-	music.total_buffer_size = BUFFER_SIZE * music.channels * music.bytes_per_sample;
 
-	music.first_data = linearAlloc(music.total_buffer_size);
-	if(!music.first_data)
-		return 1;
-	music.second_data = linearAlloc(music.total_buffer_size);
-	if(!music.second_data)
-		return 1;
+	music.last_check = 0;
+	runThread = true;
+	svcCreateEvent(&threadRequest,0);
+	aptOpenSession(); //make the ogg input/decoder thread run on second core
+		printf("%d\n", APT_SetAppCpuTimeLimit(30));
+	aptCloseSession();
+	threadHandle = threadCreate(audio_music_load, 0, STACKSIZE, 0x3f, -1, true);
+	return 0;
+}
+
+void audio_music_load()
+{
+	//first time init
+
 
 	music.first = calloc(1, sizeof(ndspWaveBuf));
-	if(!music.first)
-		return 1;
+
 	music.second = calloc(1, sizeof(ndspWaveBuf));
-	if(!music.second)
-		return 1;
+
 
 	music.first->data_vaddr = music.first_data;
 	music.first->nsamples = BUFFER_SIZE;
@@ -107,21 +89,13 @@ u8 audio_init(const char* template)
 	ndspChnSetRate(MUSIC_CHANNEL, music.sample_rate);
 	ndspChnSetFormat(MUSIC_CHANNEL, music.ndsp_format);
 	
-	//load first data
-	looped_fread(music.total_buffer_size, 44, music.data_size, music.file, music.first_data);
-	looped_fread(music.total_buffer_size, 44, music.data_size, music.file, music.second_data);
 
-	music.last_check = 0;
-	runThread = true;
-	svcCreateEvent(&threadRequest,0);
-	threadHandle = threadCreate(audio_music_load, 0, STACKSIZE, 0x3f, -2, true);
-	
+	looped_vorbis_read(music.file, music.first_data, music.total_buffer_size);
+	looped_vorbis_read(music.file, music.second_data, music.total_buffer_size);
+	ndspChnSetPaused(music.chnl, true);
+	ndspChnWaveBufAdd(music.chnl, music.first);
+	ndspChnWaveBufAdd(music.chnl, music.second);
 	music_loaded = true;
-	return 0;
-}
-
-void audio_music_load()
-{
 
 	while(runThread)
 	{
@@ -144,13 +118,16 @@ void audio_music_load()
 		music.second->looping = false;
 		music.second->status = NDSP_WBUF_FREE;
 	
-		looped_fread(music.total_buffer_size, 44, music.data_size, music.file, music.second_data); //load the actual data
+		looped_vorbis_read(music.file, music.second_data, music.total_buffer_size); //load the actual data
 
 		DSP_FlushDataCache(music.second_data, music.total_buffer_size);
 		ndspChnWaveBufAdd(music.chnl, music.second);
 
 	}
 }
+
+
+
 void audio_music_play()
 {	
 	if(!music_loaded)
@@ -185,6 +162,8 @@ void audio_fini()
 	linearFree(music.second_data);
 	free(music.first);
 	free(music.second);
+	if(music_loaded)
+		ov_clear(music.file);
 	ndspExit();
 }
 
@@ -201,6 +180,7 @@ void audio_music_check()
 	
 }
 
+//legacy, not used anymore, but left so I can use it later if necessary
 void looped_fread(u32 bytes_to_read, u32 start_point, u32 data_size, FILE* fp, u8* buffer)
 {
 	u32 current_position = ftell(fp);
@@ -218,6 +198,23 @@ void looped_fread(u32 bytes_to_read, u32 start_point, u32 data_size, FILE* fp, u
 			bytes_to_read -= bytes_to_end;
 			buffer += bytes_to_end;
 			fseek(fp, start_point, SEEK_SET); //set it to beginning
+		}
+	}
+
+}
+
+void looped_vorbis_read(OggVorbis_File *vf, u8* buffer, u32 length)
+{
+	int current_section;
+	u32 bytes_read = 0;
+	u32 total_read = 0;
+	while(total_read != length)
+	{
+		bytes_read = ov_read(vf, (char*)buffer + total_read, length-total_read, 0, 2, 1, &current_section);
+		total_read += bytes_read; 
+		if(!bytes_read)
+		{
+			ov_raw_seek(vf, 0);
 		}
 	}
 

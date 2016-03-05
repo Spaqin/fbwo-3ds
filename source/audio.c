@@ -27,7 +27,7 @@ u8 audio_init(const char* template)
     int result = ov_fopen(buffer, music.file);
     if (result < 0)
     {
-		printf("failed to open music.ogg\n");
+		printf("failed to open music.ogg, code: %d\n", result);
 		return 1;
     }
 
@@ -57,8 +57,8 @@ u8 audio_init(const char* template)
 	music.last_check = 0;
 	runThread = true;
 	svcCreateEvent(&threadRequest,0);
-	aptOpenSession(); //make the ogg input/decoder thread run on second core
-		printf("%d\n", APT_SetAppCpuTimeLimit(30));
+	aptOpenSession(); //make the ogg input/decoder thread run on second core - well, actually not really - second core's too slow 
+		APT_SetAppCpuTimeLimit(30);
 	aptCloseSession();
 	threadHandle = threadCreate(audio_music_load, 0, STACKSIZE, 0x3f, -1, true);
 	return 0;

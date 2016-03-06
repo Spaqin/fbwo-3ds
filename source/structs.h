@@ -40,7 +40,7 @@ struct Tetrimino_list* next;
 typedef struct{
 u32 DAS;  //delay (in frames) between pressing the button and moving the block automatically
 u32 DAS_speed; //delay (in frames) between moving the block
-u32 glue_delay; //lock delay - time (in frames) between block making it to the bottom and locking it in place
+u32 glue_delay[20]; //lock delay - time (in frames) between block making it to the bottom and locking it in place
 u8 hold; //hold functionality
 u8 ghost_piece; //rendering of the ghost piece
 u8 next_displayed; //no. of next blocks displayed, 0-6

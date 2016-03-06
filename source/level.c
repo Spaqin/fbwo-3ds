@@ -591,7 +591,7 @@ u32 gravity_drop()
     }
     else
     {
-	if(ticks_before_glue >= cfg.glue_delay)
+	if(ticks_before_glue >= cfg.glue_delay[level-1])
             glue();
 	return 0;
     }
@@ -604,7 +604,7 @@ void increase_ticks()
     if(check_collision(new_pos)) //means that there's something below, so we count down
     {
         ticks_before_glue++;
-	if(ticks_before_glue >= cfg.glue_delay)
+	if(ticks_before_glue >= cfg.glue_delay[level-1])
             glue();
     }
 
@@ -832,7 +832,7 @@ void apply_rotation(Tetrimino copy)
 			in_play->posx = copy.posx;
 			in_play->posy = copy.posy;
 			ARS_glue_lock = 1;
-			ticks_before_glue = cfg.glue_delay;
+			ticks_before_glue = cfg.glue_delay[level-1];
 			return;
 		    }
 		    copy.posy--; //kick 2 spaces up
@@ -842,7 +842,7 @@ void apply_rotation(Tetrimino copy)
 			in_play->posx = copy.posx;
 			in_play->posy = copy.posy;
 			ARS_glue_lock = 1;
-			ticks_before_glue = cfg.glue_delay;
+			ticks_before_glue = cfg.glue_delay[level-1];
 			return;
 		    }
 		}  
@@ -857,7 +857,7 @@ void apply_rotation(Tetrimino copy)
 		in_play->posx = copy.posx;
 		in_play->posy = copy.posy;
 		ARS_glue_lock = 1;
-		ticks_before_glue = cfg.glue_delay;
+		ticks_before_glue = cfg.glue_delay[level-1];
 		return;
 	     }
 	}

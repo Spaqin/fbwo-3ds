@@ -49,130 +49,18 @@ void parse_config(FILE* config_file)
     char theme_folder_name[60];
     char command[20];
 
-    int val, val2;
+    int val, val2, val3, val4;
     while(fgets(buffer, 79, config_file))
     {
-	if(sscanf(buffer, "%20s %d %d", command, &val, &val2) == 3)
+	//              level\no.\fpd\rpd\gd
+	if(sscanf(buffer, "%20s %d %d %d %d", command, &val, &val2, &val3, &val4) == 5)
 	{
-	    if(!strcmp(command, "droplvl1\0"))
+	    if(!strcmp(command, "level\0") && val <= 20 && val > 0)
 	    {
-		printf("drop for lvl 1: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[0] = val;
-		cfg.rows_per_drop[0] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl2\0"))
-	    {
-		printf("drop for lvl 2: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[1] = val;
-		cfg.rows_per_drop[1] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl3\0"))
-	    {
-		printf("drop for lvl 3: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[2] = val;
-		cfg.rows_per_drop[2] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl4\0"))
-	    {
-		printf("drop for lvl 4: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[3] = val;
-		cfg.rows_per_drop[3] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl5\0"))
-	    {
-		printf("drop for lvl 5: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[4] = val;
-		cfg.rows_per_drop[4] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl6\0"))
-	    {
-		printf("drop for lvl 6: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[5] = val;
-		cfg.rows_per_drop[5] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl7\0"))
-	    {
-		printf("drop for lvl 7: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[6] = val;
-		cfg.rows_per_drop[6] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl8\0"))
-	    {
-		printf("drop for lvl 8: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[7] = val;
-		cfg.rows_per_drop[7] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl9\0"))
-	    {
-		printf("drop for lvl 9: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[8] = val;
-		cfg.rows_per_drop[8] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl10\0"))
-	    {
-		printf("drop for lvl 10: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[9] = val;
-		cfg.rows_per_drop[9] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl11\0"))
-	    {
-		printf("drop for lvl 11: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[10] = val;
-		cfg.rows_per_drop[10] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl12\0"))
-	    {
-		printf("drop for lvl 12: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[11] = val;
-		cfg.rows_per_drop[11] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl13\0"))
-	    {
-		printf("drop for lvl 13: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[12] = val;
-		cfg.rows_per_drop[12] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl14\0"))
-	    {
-		printf("drop for lvl 14: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[13] = val;
-		cfg.rows_per_drop[13] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl15\0"))
-	    {
-		printf("drop for lvl 15: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[14] = val;
-		cfg.rows_per_drop[14] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl16\0"))
-	    {
-		printf("drop for lvl 16: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[15] = val;
-		cfg.rows_per_drop[15] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl17\0"))
-	    {
-		printf("drop for lvl 17: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[16] = val;
-		cfg.rows_per_drop[16] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl18\0"))
-	    {
-		printf("drop for lvl 18: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[17] = val;
-		cfg.rows_per_drop[17] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl19\0"))
-	    {
-		printf("drop for lvl 19: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[18] = val;
-		cfg.rows_per_drop[18] = val2;
-	    }
-	    else if(!strcmp(command, "droplvl20\0"))
-	    {
-		printf("drop for lvl 20: %d frames, %d rows at once\n", val, val2);
-		cfg.frames_per_drop[19] = val;
-		cfg.rows_per_drop[19] = val2;
+			printf("lvl %d: %d frms, %d rows, %d delay\n", val, val2, val3, val4);
+			cfg.frames_per_drop[val-1] = val2;
+			cfg.rows_per_drop[val-1] = val3;
+			cfg.glue_delay[val-1] = val4;
 	    }
 	}
         else if(sscanf(buffer, "%20s %d", command, &val) == 2)
@@ -240,11 +128,7 @@ void parse_config(FILE* config_file)
                     cfg.next_displayed = val;
                 }
 	    }
-            else if(!strcmp(command, "glue_delay\0"))
-            {
-                printf("Lock delay = %d frames\n", val);
-                cfg.glue_delay = val;
-            }
+
             else if(!strcmp(command, "are_delay\0"))
             {
                 printf("ARE delay = %d frames\n", val);
@@ -303,11 +187,9 @@ void tetris_control(u32 kDown)
             paused = !paused;
 			if(!paused)
 				audio_music_play();
-
             start_held = 1;
         }
     }
-
     else
         start_held = 0;
     if (kDown & KEY_SELECT)
@@ -326,10 +208,10 @@ void tetris_control(u32 kDown)
                 rotate_clockwise();
                 A_held = 1;
             }
-	    if(ARE_state)
-	    {
-		ARE_cw();
-	    }
+			if(ARE_state)
+			{
+				ARE_cw();
+			}
         }
         else
             A_held = 0;
@@ -340,10 +222,10 @@ void tetris_control(u32 kDown)
                 rotate_counterclockwise();
                 B_held = 1;
             }
-	    if(ARE_state)
-	    {
-		ARE_ccw();
-	    }
+	    	if(ARE_state)
+	    	{
+				ARE_ccw();
+	    	}
         }
         else
             B_held = 0;
@@ -351,17 +233,17 @@ void tetris_control(u32 kDown)
         {
             if(!HOLD_held && !cfg.ARS)
             {
-		if(!ARE_state)
-                    do_hold();
-                HOLD_held = 1; 
-            }
-	    else if(ARE_state)
-	    {
-		ARE_hold();
-	    }
+				if(!ARE_state)
+				     do_hold();
+				HOLD_held = 1; 
+			}
+			else if(ARE_state)
+			{
+				ARE_hold();
+			}
         }
-        else
-            HOLD_held = 0;
+		else
+		    HOLD_held = 0;
         if(kDown & KEY_UP)
         {
             if(!UP_held)
@@ -380,7 +262,7 @@ void tetris_control(u32 kDown)
         {
             if(!RIGHT_pressed)
             {
-		if(!ARE_state)
+				if(!ARE_state)
                     go_right();
                 RIGHT_DAS_count--;
                 RIGHT_pressed = 1;
@@ -394,9 +276,9 @@ void tetris_control(u32 kDown)
                         go_right();
                     }
                     if(kDown & KEY_DAS)
-			if(RIGHT_DAS_speed_count > (cfg.DAS_speed >> 1))
-			    RIGHT_DAS_speed_count = 0;
-			else
+						if(RIGHT_DAS_speed_count > (cfg.DAS_speed >> 1))
+			    			RIGHT_DAS_speed_count = 0;
+						else
                             RIGHT_DAS_speed_count = (RIGHT_DAS_speed_count + 1) % (cfg.DAS_speed>>1); //boost the DAS!
                     else
                         RIGHT_DAS_speed_count = (RIGHT_DAS_speed_count + 1) % cfg.DAS_speed;
@@ -420,7 +302,7 @@ void tetris_control(u32 kDown)
         {
             if(!LEFT_pressed)
             {
-		if(!ARE_state)
+				if(!ARE_state)
                     go_left();
                 LEFT_DAS_count--;
                 LEFT_pressed = 1;
@@ -434,9 +316,9 @@ void tetris_control(u32 kDown)
                         go_left();
                     }
                     if(kDown & KEY_DAS)
-			if(LEFT_DAS_speed_count > (cfg.DAS_speed >> 1))
-			    LEFT_DAS_speed_count = 0;
-		        else
+						if(LEFT_DAS_speed_count > (cfg.DAS_speed >> 1))
+			    			LEFT_DAS_speed_count = 0;
+		        		else
                             LEFT_DAS_speed_count = (LEFT_DAS_speed_count + 1) % (cfg.DAS_speed>>1); //boost the DAS!
                     else
                         LEFT_DAS_speed_count = (LEFT_DAS_speed_count + 1) % cfg.DAS_speed;
@@ -469,7 +351,6 @@ int main()
     cfg.DAS_speed = 6;
     cfg.next_displayed = 5;
     cfg.invisimode = 0;
-    cfg.glue_delay = 30;
     cfg.hold = 1;
     cfg.line_clear_frames = 40;
     cfg.lines_per_lvl = 10;
@@ -483,6 +364,9 @@ int main()
     static const u32 rpd[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 6, 8, 10, 12, 15, 20};
     memcpy(cfg.rows_per_drop, rpd, sizeof(u32)*20); 
 
+	static const u32 gd[] = {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30};
+	memcpy(cfg.glue_delay, gd, sizeof(u32)*20);
+
     //load textures
 
     printf("reading config...\n");
@@ -495,7 +379,7 @@ int main()
 	audio_init(theme_template); //some of the loading operations will be in another thread so maybe it will be a bit faster
 
     if(!load_textures(theme_template))
-	goto texture_error;
+		goto texture_error;
     RIGHT_DAS_count = cfg.DAS;
     LEFT_DAS_count = cfg.DAS;
 
@@ -510,6 +394,7 @@ int main()
     restartpls = 0;
     level = config_lvl;
     load_highscore();
+	gameover = 0;
 
     printf("Game ready! Press START to uh.. start?\n");
 

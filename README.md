@@ -12,20 +12,20 @@ Therefore, features include:
 * <b>High score</b> support - keeps the high score for the current configuration. If the configuration is different in current game than in the one with that high score, it will be set to 0.
 * Many variables to tweak - as of now, only in a text file. But, the number of variables is another topic in itself!
 * Theme support - no support for theme per level though, only one for the entire duration.
+* Music support - in ogg format. Put your music.ogg in your theme folder and enjoy it!
 
 #Settings
 
 With the redist, I included a sample configuration file (config.cfg).
 Most of them are straightforward, but let's check them out anyway.
 If any of these settings is not present in the file, a default value (hardcoded) will be used instead.
-* droplvl[1-20] [number1] [number2] - [1-20] is obviously affected level, number1 is how many frames the game waits for a next drop, number2 means how many lines the block is dropped in one take. 
+* level [1-20] [number1] [number2] [number3] - [1-20] is obviously affected level, number1 is how many frames the game waits for a next drop, number2 means how many lines the block is dropped in one take, number3 is glue delay (in frames, how long the game waits for the block to lock in place after reaching bottom) 
 * DAS [number] - Delayed Auto Shift - how many frames the game waits from pressing a directional button to moving the block automatically.
 * DAS_speed [number] - how many frames does the game wait until moving the block again after initial DAS delay, ie. with default values: frame 0 - player presses right, block moves right once; frame 11 - still pressed, block moves right again, frame 17 - still pressed, block moves, frame 23 - again...
 * invisimode [0/1] - toggles rendering of the blocks on the grid. For people who like challenges, you can turn it off.
 * hold [0/1] - enables HOLD functionality.
 * ghost_piece [0/1] - enables displaying of the ghost piece.
 * next_displayed [0-6] - number of NEXT pieces displayed.
-* glue_delay [number] - how many frames the game waits from a block reaching the bottom, and actually locking it.
 * line_clear_frms [number] - how many frames line clear animation lasts
 * level [1-20] - level you start with.
 * lines_per_lvl [number] - lines the player needs to clear before advancing to the next level.
@@ -55,4 +55,4 @@ Finally, how do we play this thing?
 Just use the attached makefile, but you probably will need sf2dlib and sfillib installed.
 
 #To do
-Some minor stuff, like more animations, 4-line clear indicator, back-to-back indicator (the score is calculated for it correctly, no worries), recognizing T-spins (much harder than it sounds), simple menu with configuration, and, of course, music support.
+Some minor stuff, like more animations, sound effects and a simple menu with configuration

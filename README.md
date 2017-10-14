@@ -14,7 +14,7 @@ Therefore, features include:
 * Theme support - no support for theme per level though, only one for the entire duration.
 * Music support - in ogg format. Put your music.ogg in your theme folder and enjoy it!
 
-#Settings
+# Settings
 
 With the redist, I included a sample configuration file (config.cfg).
 Most of them are straightforward, but let's check them out anyway.
@@ -33,13 +33,13 @@ If any of these settings is not present in the file, a default value (hardcoded)
 * are_delay - ARE delay in frames (time between a block locking and spawning the new one)
 * theme [name] - name of the folder with your theme.
 
-#Theme settings
+# Theme settings
 In the theme folder, theme.cfg file contains the configuration of the theme. And by that, I mean positions of the elements. These should be pretty straightforward - texture, then x and y coordinates (0,0 is in top left of the screen, and the coordinates show the top left pixel of the texture)
 Worth noting are:
 * offset_next/offset_hold - they set tetrimino position, relatively to the frames
 * lines_dig_off/level_dig_off - set y position of the digits for level/lines counters, relatively to them
 
-#Controls
+# Controls
 Finally, how do we play this thing?
 * D-pad left/right - move the block left/right
 * D-pad down - soft drop (not limited in speed though, like in Tetris DS! be careful)
@@ -51,8 +51,8 @@ Finally, how do we play this thing?
 * START - pause, when gameover - exit
 * SELECT - no gameover and with START - exit, when gameover - restart the game
 
-#Compiling
+# Compiling
 Just use the attached makefile, but you probably will need sf2dlib and sfillib installed.
 
-#To do
+# To do
 Some minor stuff, like more animations, sound effects and a simple menu with configuration
